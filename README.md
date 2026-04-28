@@ -423,13 +423,9 @@ FitandFine/
 
 ---
 
-## License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
-
----
 
 <div align="center">
-  <strong>Built with Claude AI · SwiftUI · FastAPI</strong><br/>
+
   <sub>Made by <a href="https://github.com/AdityaSidham">Aditya Sidham</a></sub>
 </div>
