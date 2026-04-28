@@ -35,10 +35,11 @@ actor NetworkClient {
     static let shared = NetworkClient()
 
     private let baseURL: String
+    var baseURLString: String { baseURL }
     private let decoder: JSONDecoder
     private let encoder: JSONEncoder
 
-    private init(baseURL: String = "http://localhost:8000/api/v1") {
+    private init(baseURL: String = "http://100.64.34.78:8000/api/v1") {
         self.baseURL = baseURL
 
         let dec = JSONDecoder()

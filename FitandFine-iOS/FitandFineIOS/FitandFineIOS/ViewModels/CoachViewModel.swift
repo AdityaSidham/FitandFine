@@ -75,7 +75,8 @@ class CoachViewModel: ObservableObject {
     // MARK: - SSE streaming
 
     private func streamCoachReply(userMessage: String, coachIdx: Int) async {
-        guard let url = URL(string: "http://localhost:8000/api/v1/ai/coach/message") else { return }
+        let baseURL = NetworkClient.shared.baseURLString
+        guard let url = URL(string: "\(baseURL)/ai/coach/message") else { return }
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
