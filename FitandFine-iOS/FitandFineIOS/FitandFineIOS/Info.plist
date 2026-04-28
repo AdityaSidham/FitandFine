@@ -12,7 +12,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>FitandFine uses the camera to scan barcodes and photograph nutrition labels for automatic macro logging.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>FitandFine reads your steps, active calories, and weight from Apple Health to personalise your nutrition targets and track your progress.</string>
+	<string>FitandFine reads your steps, active calories, and sleep data from Apple Health to personalise your nutrition targets and track your progress.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>FitandFine writes your food nutrition data and weight logs to Apple Health so your records stay in sync.</string>
 </dict>
