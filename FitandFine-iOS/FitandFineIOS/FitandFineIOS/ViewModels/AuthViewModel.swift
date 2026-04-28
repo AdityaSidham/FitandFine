@@ -87,7 +87,7 @@ class AuthViewModel: ObservableObject {
             return result
         } catch {
             state = .error(error.localizedDescription)
-            errorMessage = "Dev login failed: \(error.localizedDescription)\nIs the backend running on localhost:8000?"
+            errorMessage = "Could not connect to server. Make sure the backend is running on your Mac."
             return nil
         }
     }

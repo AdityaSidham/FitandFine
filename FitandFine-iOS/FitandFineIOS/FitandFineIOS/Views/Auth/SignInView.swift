@@ -76,14 +76,13 @@ struct SignInView: View {
                         .foregroundStyle(.tertiary)
                         .multilineTextAlignment(.center)
 
-                    // ── Dev Login (DEBUG only) ─────────────────────────────
-                    #if DEBUG
+                    // ── Guest / Demo Login ─────────────────────────────────
                     VStack(spacing: 10) {
                         HStack {
                             Rectangle()
                                 .fill(Color(.separator))
                                 .frame(height: 0.5)
-                            Text("DEV")
+                            Text("OR")
                                 .font(.caption2.weight(.semibold))
                                 .foregroundStyle(.tertiary)
                                 .padding(.horizontal, 8)
@@ -107,8 +106,8 @@ struct SignInView: View {
                             }
                         } label: {
                             HStack(spacing: 8) {
-                                Image(systemName: "hammer.fill")
-                                Text("Dev Login (Simulator)")
+                                Image(systemName: "person.fill")
+                                Text("Continue as Guest")
                                     .font(.subheadline.weight(.semibold))
                             }
                             .foregroundStyle(.white)
@@ -116,19 +115,19 @@ struct SignInView: View {
                             .padding(.vertical, 14)
                             .background(
                                 LinearGradient(
-                                    colors: [Color.indigo, Color.indigo.opacity(0.8)],
+                                    colors: [DS.Color.accent, DS.Color.accentDark],
                                     startPoint: .leading, endPoint: .trailing
                                 )
                             )
                             .clipShape(RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous))
+                            .shadow(color: DS.Color.accent.opacity(0.35), radius: 10, y: 4)
                         }
                         .padding(.horizontal, 28)
 
-                        Text("Bypasses OAuth — development only")
+                        Text("Try the app without an account")
                             .font(.caption2)
                             .foregroundStyle(.tertiary)
                     }
-                    #endif
                 }
                 .opacity(buttonAppeared ? 1 : 0)
                 .offset(y: buttonAppeared ? 0 : 20)
