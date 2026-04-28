@@ -42,6 +42,18 @@ FitandFine is a production-grade iOS application that combines barcode scanning,
 
 ---
 
+## Screenshots
+
+| Dashboard | Food Log | Food Detail |
+|---|---|---|
+| ![Dashboard](screenshots/01-dashboard.png) | ![Food Log](screenshots/02-food-log.png) | ![Food Log Detail](screenshots/03-food-log-detail.png) |
+
+| AI Coach | Analytics |
+|---|---|
+| ![AI Coach](screenshots/04-coach.png) | ![Analytics](screenshots/05-analytics.png) |
+
+---
+
 ## Architecture
 
 ```
