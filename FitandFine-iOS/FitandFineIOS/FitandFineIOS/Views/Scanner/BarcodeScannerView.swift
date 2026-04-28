@@ -34,12 +34,14 @@ enum ScannerMode { case barcode, label }
 
 // MARK: - Camera Session ViewModel
 
-@MainActor
+// NOTE: NOT @MainActor — AVFoundation requires camera work off the main thread.
+// UI updates are dispatched explicitly to DispatchQueue.main.
 class BarcodeScannerCameraViewModel: NSObject, ObservableObject,
     AVCaptureMetadataOutputObjectsDelegate, AVCapturePhotoCaptureDelegate {
 
     let session = AVCaptureSession()
     private let photoOutput = AVCapturePhotoOutput()
+    private let cameraQueue = DispatchQueue(label: "com.fitandfine.camera", qos: .userInitiated)
 
     @Published var detectedBarcode: String? = nil
     @Published var capturedImageData: Data? = nil
@@ -50,21 +52,21 @@ class BarcodeScannerCameraViewModel: NSObject, ObservableObject,
     override init() { super.init() }
 
     func startSession() {
-        guard !session.isRunning else { return }
-        Task.detached { [weak self] in
-            guard let self else { return }
-            await self.setupSession()
+        cameraQueue.async { [weak self] in
+            guard let self, !self.session.isRunning else { return }
+            self.setupSession()
             self.session.startRunning()
         }
     }
 
     func stopSession() {
-        Task.detached { [weak self] in
+        cameraQueue.async { [weak self] in
             self?.session.stopRunning()
         }
     }
 
-    private func setupSession() async {
+    private func setupSession() {
+        // Must be called on cameraQueue (not main thread)
         session.beginConfiguration()
         session.sessionPreset = .photo
 
@@ -82,11 +84,11 @@ class BarcodeScannerCameraViewModel: NSObject, ObservableObject,
         let metaOutput = AVCaptureMetadataOutput()
         if session.canAddOutput(metaOutput) {
             session.addOutput(metaOutput)
-            metaOutput.setMetadataObjectsDelegate(self, queue: .main)
+            metaOutput.setMetadataObjectsDelegate(self, queue: cameraQueue)
             metaOutput.metadataObjectTypes = [.ean13, .ean8, .upce, .code128, .qr]
         }
 
-        // Photo capture output (for label scanning)
+        // Photo capture output (for nutrition label)
         if session.canAddOutput(photoOutput) {
             session.addOutput(photoOutput)
         }
@@ -105,27 +107,33 @@ class BarcodeScannerCameraViewModel: NSObject, ObservableObject,
     // MARK: - Capture photo for label scanning
     func capturePhoto() {
         guard !isCapturing else { return }
-        isCapturing = true
-        let settings = AVCapturePhotoSettings()
-        settings.flashMode = isTorchOn ? .on : .off
-        photoOutput.capturePhoto(with: settings, delegate: self)
+        DispatchQueue.main.async { self.isCapturing = true }
+        cameraQueue.async { [weak self] in
+            guard let self else { return }
+            let settings = AVCapturePhotoSettings()
+            settings.flashMode = self.isTorchOn ? .on : .off
+            self.photoOutput.capturePhoto(with: settings, delegate: self)
+        }
     }
 
     // MARK: - AVCapturePhotoCaptureDelegate
-    nonisolated func photoOutput(
+    func photoOutput(
         _ output: AVCapturePhotoOutput,
         didFinishProcessingPhoto photo: AVCapturePhoto,
         error: Error?
     ) {
-        guard let data = photo.fileDataRepresentation() else { return }
-        Task { @MainActor [weak self] in
-            self?.capturedImageData = data
-            self?.isCapturing = false
+        guard let data = photo.fileDataRepresentation() else {
+            DispatchQueue.main.async { self.isCapturing = false }
+            return
+        }
+        DispatchQueue.main.async {
+            self.capturedImageData = data
+            self.isCapturing = false
         }
     }
 
     // MARK: - AVCaptureMetadataOutputObjectsDelegate
-    nonisolated func metadataOutput(
+    func metadataOutput(
         _ output: AVCaptureMetadataOutput,
         didOutput objects: [AVMetadataObject],
         from connection: AVCaptureConnection
@@ -135,11 +143,10 @@ class BarcodeScannerCameraViewModel: NSObject, ObservableObject,
             let value = first.stringValue
         else { return }
 
-        Task { @MainActor [weak self] in
+        DispatchQueue.main.async { [weak self] in
             guard let self, value != self.lastScannedCode else { return }
             self.lastScannedCode = value
             self.detectedBarcode = value
-            // Haptic feedback on successful scan
             let gen = UINotificationFeedbackGenerator()
             gen.notificationOccurred(.success)
         }
