@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitandFine</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green:      #22c55e;
+    --green-dark: #16a34a;
+    --green-mid:  #4ade80;
+    --green-pale: #dcfce7;
+    --blue:       #3b82f6;
+    --orange:     #f97316;
+    --purple:     #a855f7;
+    --red:        #ef4444;
+    --surface:    #ffffff;
+    --bg:         #f0fdf4;
+    --text:       #111827;
+    --sub:        #6b7280;
+    --border:     #e5e7eb;
+  }
+
+  html, body {
+    font-family: 'Inter', sans-serif;
+    background: #000;
+    color: var(--text);
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* ─── Phone shell ─── */
+  .shell {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 60% 30%, #064e3b 0%, #022c22 100%);
+  }
+
+  .phone {
+    width: 390px;
+    height: 844px;
+    background: var(--surface);
+    border-radius: 54px;
+    box-shadow: 0 0 0 2px #333, 0 0 0 8px #1a1a1a, 0 40px 120px rgba(0,0,0,0.8);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Notch */
+  .notch {
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 126px; height: 34px;
+    background: #000;
+    border-radius: 0 0 22px 22px;
+    z-index: 999;
+  }
+
+  /* ─── SCREENS ─── */
+  .screen {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .4s ease, transform .4s ease;
+    transform: translateX(60px);
+  }
+  .screen.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateX(0);
+  }
+  .screen.exit {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+
+  /* ═══════════════════════════════════
+     SCREEN 0 — COVER / LOGIN
+  ═══════════════════════════════════ */
+  #screen-login {
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Fruit pattern hero */
+  .login-hero {
+    flex: 0 0 420px;
+    position: relative;
+    overflow: hidden;
+    background: #f0fdf4;
+  }
+
+  /* SVG fruit pattern tiled via background-image */
+  .fruit-pattern {
+    position: absolute;
+    inset: -20px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3C!-- strawberry --%3E%3Cellipse cx='30' cy='28' rx='10' ry='13' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3Cline x1='30' y1='15' x2='30' y2='8' stroke='%2322c55e' stroke-width='1.5'/%3E%3Cline x1='26' y1='12' x2='22' y2='8' stroke='%2322c55e' stroke-width='1.5'/%3E%3Cline x1='34' y1='12' x2='38' y2='8' stroke='%2322c55e' stroke-width='1.5'/%3E%3C!-- watermelon slice --%3E%3Cpath d='M 70 15 A 20 20 0 0 1 110 15 L 90 40 Z' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3Cline x1='90' y1='15' x2='90' y2='40' stroke='%2322c55e' stroke-width='1' stroke-dasharray='2,2'/%3E%3C!-- apple --%3E%3Ccircle cx='160' cy='30' r='16' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3Cline x1='160' y1='14' x2='160' y2='8' stroke='%2322c55e' stroke-width='1.5'/%3E%3Cpath d='M 160 8 Q 168 4 172 8' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3C!-- orange --%3E%3Ccircle cx='40' cy='80' r='18' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3Cline x1='40' y1='62' x2='40' y2='56' stroke='%2322c55e' stroke-width='1.5'/%3E%3Cpath d='M 40 71 L 40 89 M 29 80 L 58 80' stroke='%2322c55e' stroke-width='1' stroke-dasharray='2,2'/%3E%3C!-- pineapple --%3E%3Cellipse cx='100' cy='85' rx='14' ry='18' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3Cpath d='M 90 67 Q 100 58 110 67' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3Cpath d='M 86 63 Q 100 52 114 63' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3Cpath d='M 88 72 L 112 72 M 88 79 L 112 79 M 88 86 L 112 86 M 91 67 L 91 103 M 100 67 L 100 103 M 109 67 L 109 103' stroke='%2322c55e' stroke-width='0.8' opacity='0.5'/%3E%3C!-- grapes --%3E%3Ccircle cx='155' cy='68' r='7' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3Ccircle cx='170' cy='68' r='7' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3Ccircle cx='163' cy='80' r='7' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3Ccircle cx='148' cy='80' r='7' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3Ccircle cx='178' cy='80' r='7' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3Ccircle cx='155' cy='92' r='7' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3Ccircle cx='170' cy='92' r='7' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3Cline x1='163' y1='61' x2='163' y2='52' stroke='%2322c55e' stroke-width='1.5'/%3E%3C!-- lemon --%3E%3Cellipse cx='30' cy='145' rx='16' ry='12' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3Cline x1='14' y1='145' x2='8' y2='140' stroke='%2322c55e' stroke-width='1.5'/%3E%3Cline x1='46' y1='145' x2='52' y2='140' stroke='%2322c55e' stroke-width='1.5'/%3E%3C!-- avocado --%3E%3Cellipse cx='95' cy='150' rx='12' ry='17' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3Cellipse cx='95' cy='154' rx='6' ry='8' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3C!-- cherry --%3E%3Ccircle cx='155' cy='150' r='9' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3Ccircle cx='172' cy='148' r='9' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3Cpath d='M 155 141 Q 160 128 172 139' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3C!-- banana --%3E%3Cpath d='M 48 168 Q 58 155 75 158 Q 85 160 82 172 Q 79 184 65 185 Q 50 186 48 168 Z' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3C!-- kiwi --%3E%3Ccircle cx='130' cy='172' r='14' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3Cpath d='M 130 158 L 130 186 M 116 172 L 144 172 M 120 162 L 140 182 M 140 162 L 120 182' stroke='%2322c55e' stroke-width='1' opacity='0.5'/%3E%3Ccircle cx='130' cy='172' r='4' fill='none' stroke='%2322c55e' stroke-width='1.5'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+    opacity: 0.55;
+  }
+
+  /* Green gradient overlay */
+  .login-hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 200px;
+    background: linear-gradient(to bottom, transparent, #fff);
+  }
+
+  .hero-badge {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(34,197,94,0.3);
+    border-radius: 50px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green-dark);
+    letter-spacing: .5px;
+    white-space: nowrap;
+    z-index: 2;
+  }
+
+  .hero-logo {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    text-align: center;
+    width: 100%;
+  }
+
+  .logo-ring {
+    width: 80px;
+    height: 80px;
+    border-radius: 28px;
+    background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    box-shadow: 0 12px 40px rgba(34,197,94,0.4);
+    font-size: 36px;
+  }
+
+  .hero-title {
+    font-size: 36px;
+    font-weight: 900;
+    color: #111;
+    letter-spacing: -1.5px;
+  }
+  .hero-title span { color: var(--green-dark); }
+
+  .hero-sub {
+    font-size: 14px;
+    color: var(--sub);
+    margin-top: 4px;
+  }
+
+  /* Login card */
+  .login-card {
+    flex: 1;
+    padding: 28px 28px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .btn-apple {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 54px;
+    background: #000;
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-apple:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+  .btn-apple:active { transform: scale(0.98); }
+
+  .btn-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 54px;
+    background: #fff;
+    color: #333;
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s, border-color .15s;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-google:hover { border-color: var(--green); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #d1d5db;
+    font-size: 12px;
+  }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .terms {
+    text-align: center;
+    font-size: 11px;
+    color: #9ca3af;
+    line-height: 1.6;
+    margin-top: 4px;
+  }
+  .terms a { color: var(--green-dark); text-decoration: none; }
+
+  /* ═══════════════════════════════════
+     SCREEN 1 — DASHBOARD
+  ═══════════════════════════════════ */
+  #screen-dashboard {
+    background: #f0fdf4;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Status bar */
+  .status-bar {
+    height: 50px;
+    padding: 0 28px;
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 6px;
+    flex-shrink: 0;
+    background: transparent;
+  }
+  .status-time { font-weight: 700; font-size: 15px; }
+  .status-icons { margin-left: auto; display: flex; gap: 6px; align-items: center; font-size: 13px; }
+
+  .dash-scroll {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 18px 100px;
+    scroll-behavior: smooth;
+  }
+  .dash-scroll::-webkit-scrollbar { display: none; }
+
+  /* Nav bar */
+  .nav-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 86px;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(0,0,0,0.06);
+    display: flex;
+    align-items: flex-start;
+    padding-top: 10px;
+    z-index: 100;
+    border-radius: 0 0 54px 54px;
+  }
+
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: transform .15s;
+  }
+  .nav-item:active { transform: scale(0.9); }
+
+  .nav-icon {
+    width: 42px; height: 42px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: background .2s, transform .2s;
+  }
+  .nav-item.active .nav-icon {
+    background: var(--green-pale);
+    transform: scale(1.05);
+  }
+  .nav-label {
+    font-size: 10px;
+    font-weight: 500;
+    color: #9ca3af;
+    transition: color .2s;
+  }
+  .nav-item.active .nav-label { color: var(--green-dark); font-weight: 700; }
+
+  /* Greeting */
+  .greeting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 4px 16px;
+  }
+  .greeting-text h2 { font-size: 22px; font-weight: 800; color: #111; letter-spacing: -.5px; }
+  .greeting-text p { font-size: 13px; color: var(--sub); margin-top: 1px; }
+
+  .streak-pill {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border-radius: 30px;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: transform .15s;
+    box-shadow: 0 2px 8px rgba(251,191,36,.3);
+  }
+  .streak-pill:hover { transform: scale(1.04); }
+  .streak-pill span { font-size: 13px; font-weight: 700; color: #92400e; }
+
+  /* Calorie ring card */
+  .calorie-card {
+    background: linear-gradient(135deg, #16a34a, #15803d, #166534);
+    border-radius: 28px;
+    padding: 24px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 14px;
+    box-shadow: 0 12px 40px rgba(22,163,74,.35);
+    position: relative;
+    overflow: hidden;
+  }
+  .calorie-card::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.06);
+  }
+  .calorie-card::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: 60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.04);
+  }
+
+  /* SVG ring */
+  .ring-wrap { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
+  .ring-wrap svg { transform: rotate(-90deg); }
+  .ring-track { fill: none; stroke: rgba(255,255,255,.18); stroke-width: 10; }
+  .ring-fill {
+    fill: none;
+    stroke: rgba(255,255,255,.9);
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 314;
+    stroke-dashoffset: 94;
+    transition: stroke-dashoffset 1.5s cubic-bezier(.4,0,.2,1);
+  }
+  .ring-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .ring-label .big { font-size: 28px; font-weight: 900; }
+  .ring-label .sm  { font-size: 11px; opacity: .75; margin-top: -2px; }
+
+  .calorie-stats { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+  .calorie-stat { display: flex; flex-direction: column; gap: 1px; }
+  .calorie-stat .lbl { font-size: 10px; opacity: .7; text-transform: uppercase; letter-spacing: .5px; }
+  .calorie-stat .val { font-size: 18px; font-weight: 800; }
+
+  /* Macro bars card */
+  .card {
+    background: #fff;
+    border-radius: 22px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 16px rgba(0,0,0,.06);
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--sub);
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    margin-bottom: 14px;
+  }
+
+  .macro-row { display: flex; flex-direction: column; gap: 12px; }
+  .macro-item { display: flex; flex-direction: column; gap: 5px; }
+  .macro-header { display: flex; justify-content: space-between; align-items: baseline; }
+  .macro-name { font-size: 14px; font-weight: 600; }
+  .macro-nums { font-size: 12px; color: var(--sub); }
+  .macro-nums strong { font-weight: 700; color: #111; }
+  .bar-track { height: 8px; background: #f3f4f6; border-radius: 99px; overflow: hidden; }
+  .bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 1.2s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* Activity card */
+  .activity-row { display: flex; gap: 10px; }
+  .activity-tile {
+    flex: 1;
+    background: #fff;
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow: 0 2px 16px rgba(0,0,0,.06);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: transform .2s;
+    cursor: pointer;
+  }
+  .activity-tile:hover { transform: translateY(-2px); }
+  .act-icon { font-size: 24px; }
+  .act-val { font-size: 22px; font-weight: 900; color: #111; }
+  .act-lbl { font-size: 11px; color: var(--sub); font-weight: 500; }
+
+  /* Streak card */
+  .streak-card { margin-bottom: 14px; }
+  .chain-dots { display: flex; gap: 6px; margin-top: 12px; }
+  .chain-dot {
+    flex: 1;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    transition: transform .3s;
+  }
+  .chain-dot.filled {
+    background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(34,197,94,.35);
+  }
+  .chain-dot.empty { border: 1.5px solid #e5e7eb; background: #f9fafb; }
+  .chain-dot.today { border: 2px solid var(--green); background: var(--green-pale); }
+  .chain-labels { display: flex; gap: 6px; margin-top: 4px; }
+  .chain-labels span { flex: 1; text-align: center; font-size: 9px; color: #9ca3af; font-weight: 500; }
+
+  /* Sleep card */
+  .sleep-ring-row { display: flex; align-items: center; gap: 20px; }
+  .sleep-ring { position: relative; width: 90px; height: 90px; flex-shrink: 0; }
+  .sleep-ring svg { transform: rotate(-90deg); }
+  .sleep-ring-label {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .sleep-ring-label .score { font-size: 22px; font-weight: 900; color: #6366f1; }
+  .sleep-ring-label .sl    { font-size: 9px; color: var(--sub); }
+  .sleep-bars { flex: 1; display: flex; flex-direction: column; gap: 7px; }
+  .sleep-bar-row { display: flex; align-items: center; gap: 8px; }
+  .sleep-bar-row .lbl { font-size: 10px; color: var(--sub); width: 38px; font-weight: 500; }
+  .sleep-bar-track { flex: 1; height: 6px; background: #f3f4f6; border-radius: 99px; overflow: hidden; }
+  .sleep-bar-fill { height: 100%; border-radius: 99px; }
+  .sleep-bar-row .dur { font-size: 10px; font-weight: 600; color: #111; width: 28px; text-align: right; }
+
+  /* Food log preview */
+  .log-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f3f4f6;
+    cursor: pointer;
+    transition: background .15s;
+    border-radius: 8px;
+  }
+  .log-item:last-child { border-bottom: none; }
+  .log-icon {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .log-name { font-size: 14px; font-weight: 600; flex: 1; }
+  .log-cal { font-size: 13px; font-weight: 700; color: var(--green-dark); }
+
+  /* Section header */
+  .section-hdr {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .section-hdr h3 { font-size: 16px; font-weight: 700; }
+  .see-all { font-size: 13px; color: var(--green-dark); font-weight: 600; cursor: pointer; }
+
+  /* ═══════════════════════════════════
+     SCREEN 2 — FOOD LOG / SEARCH
+  ═══════════════════════════════════ */
+  #screen-foodlog {
+    background: #f9fafb;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .screen-header {
+    padding: 54px 20px 16px;
+    background: #fff;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .screen-header h1 { font-size: 28px; font-weight: 900; letter-spacing: -.8px; }
+
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f3f4f6;
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-top: 14px;
+    cursor: text;
+    transition: background .2s;
+  }
+  .search-bar:focus-within { background: #e8f5e9; outline: 2px solid var(--green); }
+  .search-bar input {
+    border: none;
+    background: transparent;
+    font-size: 15px;
+    color: #111;
+    outline: none;
+    flex: 1;
+    font-family: 'Inter', sans-serif;
+  }
+  .search-bar input::placeholder { color: #9ca3af; }
+
+  .meal-section { margin-bottom: 14px; }
+  .meal-card {
+    background: #fff;
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: 0 2px 16px rgba(0,0,0,.05);
+  }
+  .meal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    cursor: pointer;
+  }
+  .meal-icon-wrap {
+    width: 38px; height: 38px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  .meal-header h4 { font-size: 15px; font-weight: 700; flex: 1; }
+  .meal-pill {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 99px;
+  }
+  .meal-entries { border-top: 1px solid #f3f4f6; }
+  .meal-entry {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    border-bottom: 1px solid #f9fafb;
+    transition: background .15s;
+  }
+  .meal-entry:last-child { border-bottom: none; }
+  .entry-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .entry-info { flex: 1; }
+  .entry-name { font-size: 14px; font-weight: 600; }
+  .entry-sub { font-size: 11px; color: var(--sub); margin-top: 1px; }
+  .entry-cal { font-size: 13px; font-weight: 700; }
+  .entry-delete {
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 8px;
+    transition: background .15s;
+    color: #d1d5db;
+  }
+  .entry-delete:hover { background: #fef2f2; color: var(--red); }
+  .add-food-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--green-dark);
+    cursor: pointer;
+    border-top: 1px solid #f3f4f6;
+    transition: background .15s;
+  }
+  .add-food-btn:hover { background: #f0fdf4; }
+
+  .foodlog-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 18px 100px;
+  }
+  .foodlog-scroll::-webkit-scrollbar { display: none; }
+
+  .daily-bar {
+    position: absolute;
+    bottom: 86px; left: 0; right: 0;
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid #f3f4f6;
+    display: flex;
+    padding: 10px 0;
+  }
+  .daily-cell { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .daily-cell .dv { font-size: 14px; font-weight: 800; }
+  .daily-cell .dl { font-size: 10px; color: var(--sub); font-weight: 500; }
+
+  /* ═══════════════════════════════════
+     SCREEN 3 — AI COACH
+  ═══════════════════════════════════ */
+  #screen-coach {
+    background: #f9fafb;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .coach-header {
+    background: linear-gradient(135deg, #7c3aed, #6d28d9, #5b21b6);
+    padding: 54px 20px 24px;
+    color: #fff;
+  }
+  .coach-header h1 { font-size: 26px; font-weight: 900; letter-spacing: -.5px; }
+  .coach-header p { font-size: 13px; opacity: .8; margin-top: 2px; }
+  .coach-online {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,.15);
+    border-radius: 99px;
+    padding: 4px 12px;
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .coach-online::before { content:''; width:8px; height:8px; border-radius:50%; background:#4ade80; }
+
+  .chat-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .chat-scroll::-webkit-scrollbar { display: none; }
+
+  .bubble {
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    line-height: 1.5;
+    animation: popIn .3s ease;
+  }
+  @keyframes popIn {
+    from { opacity:0; transform:scale(0.9) translateY(8px); }
+    to { opacity:1; transform:scale(1) translateY(0); }
+  }
+  .bubble.ai {
+    align-self: flex-start;
+    background: #fff;
+    color: #111;
+    border-bottom-left-radius: 6px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.08);
+  }
+  .bubble.user {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    color: #fff;
+    border-bottom-right-radius: 6px;
+  }
+  .bubble .timestamp {
+    font-size: 10px;
+    opacity: .5;
+    margin-top: 4px;
+  }
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .chip {
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+  }
+  .chip:hover { background: #ede9fe; border-color: #7c3aed; color: #6d28d9; }
+  .chip:active { transform: scale(0.96); }
+
+  .chat-input-row {
+    display: flex;
+    gap: 10px;
+    padding: 12px 18px;
+    background: #fff;
+    border-top: 1px solid #f3f4f6;
+    align-items: flex-end;
+  }
+  .chat-input {
+    flex: 1;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 20px;
+    padding: 10px 16px;
+    font-size: 14px;
+    color: #111;
+    outline: none;
+    resize: none;
+    font-family: 'Inter', sans-serif;
+    transition: border-color .2s;
+    height: 42px;
+  }
+  .chat-input:focus { border-color: #7c3aed; }
+  .send-btn {
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    border: none;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    color: #fff;
+    transition: transform .15s;
+    flex-shrink: 0;
+  }
+  .send-btn:hover { transform: scale(1.08); }
+  .send-btn:active { transform: scale(0.94); }
+
+  /* Typing indicator */
+  .typing { display: flex; gap: 5px; align-items: center; padding: 2px 0; }
+  .typing span {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #9ca3af;
+    animation: bounce 1.2s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: .2s; }
+  .typing span:nth-child(3) { animation-delay: .4s; }
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30%            { transform: translateY(-6px); }
+  }
+
+  /* ═══════════════════════════════════
+     SCREEN 4 — ANALYTICS
+  ═══════════════════════════════════ */
+  #screen-analytics {
+    background: #f0fdf4;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .analytics-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 54px 18px 100px;
+  }
+  .analytics-scroll::-webkit-scrollbar { display: none; }
+
+  .analytics-title { font-size: 28px; font-weight: 900; letter-spacing: -.8px; margin-bottom: 20px; }
+
+  /* Mini stat cards row */
+  .stat-row { display: flex; gap: 10px; margin-bottom: 14px; }
+  .stat-card {
+    flex: 1;
+    background: #fff;
+    border-radius: 20px;
+    padding: 16px 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.05);
+  }
+  .stat-card .ico { font-size: 22px; margin-bottom: 6px; }
+  .stat-card .sv { font-size: 22px; font-weight: 900; }
+  .stat-card .sl { font-size: 10px; color: var(--sub); font-weight: 500; margin-top: 1px; }
+
+  /* Bar chart */
+  .chart-card { background: #fff; border-radius: 22px; padding: 18px 20px; margin-bottom: 14px; box-shadow: 0 2px 16px rgba(0,0,0,.06); }
+  .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 100px; margin-top: 14px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bar-col .bar {
+    width: 100%;
+    border-radius: 6px 6px 0 0;
+    transition: height 1s cubic-bezier(.4,0,.2,1);
+    min-height: 4px;
+  }
+  .bar-col .lbl { font-size: 9px; color: #9ca3af; font-weight: 500; }
+
+  /* Weight trend */
+  .weight-trend svg { width: 100%; }
+
+  /* ═══════════════════════════════════
+     FLOATING ACTION (Log Food)
+  ═══════════════════════════════════ */
+  .fab {
+    position: absolute;
+    bottom: 98px;
+    right: 24px;
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(22,163,74,.4);
+    cursor: pointer;
+    z-index: 101;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .fab:hover { transform: scale(1.08) translateY(-2px); box-shadow: 0 12px 32px rgba(22,163,74,.5); }
+  .fab:active { transform: scale(0.94); }
+
+  /* ═══════════════════════════════════
+     TOAST
+  ═══════════════════════════════════ */
+  .toast {
+    position: absolute;
+    bottom: 110px;
+    left: 50%; transform: translateX(-50%) translateY(20px);
+    background: rgba(17,24,39,.9);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity .3s, transform .3s;
+    pointer-events: none;
+    z-index: 999;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Pill label */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  /* Micro animation for card entrance */
+  @keyframes cardIn {
+    from { opacity:0; transform: translateY(16px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+  .card-anim { animation: cardIn .5s ease both; }
+  .card-anim:nth-child(1) { animation-delay: .05s; }
+  .card-anim:nth-child(2) { animation-delay: .10s; }
+  .card-anim:nth-child(3) { animation-delay: .15s; }
+  .card-anim:nth-child(4) { animation-delay: .20s; }
+  .card-anim:nth-child(5) { animation-delay: .25s; }
+  .card-anim:nth-child(6) { animation-delay: .30s; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+<div class="phone">
+  <div class="notch"></div>
+
+  <!-- ════════════ SCREEN: LOGIN ════════════ -->
+  <div class="screen active" id="screen-login">
+    <div class="login-hero">
+      <div class="fruit-pattern"></div>
+      <div class="hero-badge">🌿 Your Smart Nutrition Companion</div>
+      <div class="hero-logo">
+        <div class="logo-ring">🥑</div>
+        <h1 class="hero-title">Fit<span>and</span>Fine</h1>
+        <p class="hero-sub">AI-powered nutrition & wellness</p>
+      </div>
+    </div>
+
+    <div class="login-card">
+      <button class="btn-apple" onclick="goTo('dashboard')">
+        <svg width="18" height="22" viewBox="0 0 18 22" fill="white"><path d="M14.97 11.557c-.026-2.9 2.373-4.31 2.48-4.375C16.006 5.077 14.09 4.847 13.44 4.827c-1.483-.153-2.913.878-3.666.878-.764 0-1.918-.86-3.162-.837-1.61.023-3.113.941-3.942 2.38-1.695 2.94-.433 7.285 1.2 9.672.814 1.17 1.773 2.474 3.025 2.428 1.223-.05 1.68-.78 3.153-.78 1.462 0 1.888.78 3.164.752 1.31-.022 2.136-1.175 2.93-2.355.944-1.34 1.322-2.66 1.34-2.729-.03-.012-2.553-.973-2.577-3.88zM12.41 3.14C13.08 2.32 13.53 1.19 13.404 0c-1.004.041-2.25.666-2.945 1.47-.644.71-1.21 1.878-1.06 2.98 1.12.084 2.27-.568 3.012-1.31z"/></svg>
+        Continue with Apple
+      </button>
+
+      <div class="divider">or</div>
+
+      <button class="btn-google" onclick="goTo('dashboard')">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.909-2.259c-.805.54-1.836.86-3.047.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"/><path d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.462.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+        Continue with Google
+      </button>
+
+      <p class="terms">By continuing, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. We'll never share your data.</p>
+    </div>
+  </div>
+
+  <!-- ════════════ SCREEN: DASHBOARD ════════════ -->
+  <div class="screen" id="screen-dashboard">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <span class="status-icons">
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="black"><rect x="0" y="4" width="3" height="8" rx="1"/><rect x="4" y="2" width="3" height="10" rx="1"/><rect x="8" y="0" width="3" height="12" rx="1"/><rect x="12" y="0" width="3" height="12" rx="1" opacity=".3"/></svg>
+        🔋
+      </span>
+    </div>
+
+    <div class="dash-scroll">
+      <!-- Greeting -->
+      <div class="greeting-row card-anim">
+        <div class="greeting-text">
+          <h2>Good morning! 👋</h2>
+          <p>Wednesday, Apr 23</p>
+        </div>
+        <div class="streak-pill" onclick="showToast('🔥 5-day streak!')">
+          <span>🔥</span>
+          <span>5 days</span>
+        </div>
+      </div>
+
+      <!-- Calorie ring card -->
+      <div class="calorie-card card-anim">
+        <div class="ring-wrap">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle class="ring-track" cx="60" cy="60" r="50"/>
+            <circle class="ring-fill" id="dashRing" cx="60" cy="60" r="50"/>
+          </svg>
+          <div class="ring-label">
+            <span class="big">1,420</span>
+            <span class="sm">kcal</span>
+          </div>
+        </div>
+        <div class="calorie-stats">
+          <div class="calorie-stat">
+            <span class="lbl">🎯 Goal</span>
+            <span class="val">2,000</span>
+          </div>
+          <div class="calorie-stat">
+            <span class="lbl">⬇️ Remaining</span>
+            <span class="val">580</span>
+          </div>
+          <div class="calorie-stat">
+            <span class="lbl">🔥 Burned</span>
+            <span class="val">340</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Macro bars -->
+      <div class="card card-anim">
+        <p class="card-title">Macros Today</p>
+        <div class="macro-row">
+          <div class="macro-item">
+            <div class="macro-header">
+              <span class="macro-name" style="color:#3b82f6">🥩 Protein</span>
+              <span class="macro-nums"><strong>98</strong>g / 150g</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:65%;background:#3b82f6;"></div></div>
+          </div>
+          <div class="macro-item">
+            <div class="macro-header">
+              <span class="macro-name" style="color:#f97316">🍚 Carbs</span>
+              <span class="macro-nums"><strong>162</strong>g / 220g</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:74%;background:linear-gradient(90deg,#f97316,#fb923c);"></div></div>
+          </div>
+          <div class="macro-item">
+            <div class="macro-header">
+              <span class="macro-name" style="color:#ef4444">🫒 Fat</span>
+              <span class="macro-nums"><strong>38</strong>g / 65g</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:58%;background:#ef4444;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity tiles -->
+      <div class="activity-row card-anim">
+        <div class="activity-tile">
+          <div class="act-icon">👟</div>
+          <div class="act-val">7,842</div>
+          <div class="act-lbl">Steps</div>
+        </div>
+        <div class="activity-tile">
+          <div class="act-icon">🔥</div>
+          <div class="act-val">340</div>
+          <div class="act-lbl">Cal burned</div>
+        </div>
+        <div class="activity-tile" onclick="goTo('coach')">
+          <div class="act-icon">😴</div>
+          <div class="act-val">7.5h</div>
+          <div class="act-lbl">Sleep · <span style="color:#6366f1;font-weight:700">82</span></div>
+        </div>
+      </div>
+
+      <!-- Streak card -->
+      <div class="card card-anim streak-card">
+        <div class="section-hdr">
+          <h3>🔥 Logging Streak</h3>
+          <span class="pill" style="background:#fef3c7;color:#92400e;">5 days</span>
+        </div>
+        <div class="chain-dots" id="chainDots"></div>
+        <div class="chain-labels" id="chainLabels"></div>
+      </div>
+
+      <!-- Today's log preview -->
+      <div class="card card-anim">
+        <div class="section-hdr">
+          <h3>Today's Log</h3>
+          <span class="see-all" onclick="goTo('foodlog')">See all →</span>
+        </div>
+        <div class="log-item">
+          <div class="log-icon" style="background:#fff7ed">🥣</div>
+          <span class="log-name">Overnight Oats</span>
+          <span class="log-cal">380 kcal</span>
+        </div>
+        <div class="log-item">
+          <div class="log-icon" style="background:#f0fdf4">🥗</div>
+          <span class="log-name">Greek Salad</span>
+          <span class="log-cal">290 kcal</span>
+        </div>
+        <div class="log-item">
+          <div class="log-icon" style="background:#eff6ff">🍌</div>
+          <span class="log-name">Banana + Almonds</span>
+          <span class="log-cal">220 kcal</span>
+        </div>
+        <div class="log-item" style="border-bottom:none">
+          <div class="log-icon" style="background:#fdf4ff">🍗</div>
+          <span class="log-name">Grilled Chicken Rice</span>
+          <span class="log-cal">530 kcal</span>
+        </div>
+      </div>
+
+    </div><!-- /dash-scroll -->
+
+    <!-- FAB -->
+    <div class="fab" onclick="goTo('foodlog')">+</div>
+
+    <!-- Nav bar -->
+    <div class="nav-bar">
+      <div class="nav-item active" onclick="goTo('dashboard')">
+        <div class="nav-icon">🏠</div>
+        <span class="nav-label">Home</span>
+      </div>
+      <div class="nav-item" onclick="goTo('foodlog')">
+        <div class="nav-icon">🍽️</div>
+        <span class="nav-label">Log</span>
+      </div>
+      <div class="nav-item" onclick="goTo('coach')">
+        <div class="nav-icon">🤖</div>
+        <span class="nav-label">Coach</span>
+      </div>
+      <div class="nav-item" onclick="goTo('analytics')">
+        <div class="nav-icon">📊</div>
+        <span class="nav-label">Analytics</span>
+      </div>
+      <div class="nav-item" onclick="showToast('Profile coming soon!')">
+        <div class="nav-icon">👤</div>
+        <span class="nav-label">Profile</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ SCREEN: FOOD LOG ════════════ -->
+  <div class="screen" id="screen-foodlog">
+    <div class="screen-header">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span onclick="goTo('dashboard')" style="font-size:22px;cursor:pointer">←</span>
+        <h1>Food Log</h1>
+        <span style="margin-left:auto;font-size:22px;cursor:pointer" onclick="showToast('📷 Scanner opened!')">📷</span>
+      </div>
+      <div class="search-bar">
+        <span>🔍</span>
+        <input type="text" placeholder="Search 500k+ foods…" id="searchInput" oninput="handleSearch(this.value)">
+      </div>
+    </div>
+
+    <div class="foodlog-scroll">
+      <div id="search-results" style="display:none">
+        <div class="card" style="margin-bottom:10px">
+          <p style="font-size:11px;color:#9ca3af;font-weight:600;margin-bottom:10px">SEARCH RESULTS</p>
+          <div id="result-list"></div>
+        </div>
+      </div>
+
+      <div id="meal-sections">
+        <!-- Breakfast -->
+        <div class="meal-section">
+          <div class="meal-card">
+            <div class="meal-header">
+              <div class="meal-icon-wrap" style="background:#fff7ed">🌅</div>
+              <h4>Breakfast</h4>
+              <span class="meal-pill" style="background:#fff7ed;color:#c2410c;">380 kcal</span>
+            </div>
+            <div class="meal-entries">
+              <div class="meal-entry" id="entry-oats">
+                <div class="entry-dot" style="background:#f97316"></div>
+                <div class="entry-info">
+                  <div class="entry-name">Overnight Oats</div>
+                  <div class="entry-sub">1 serving · 380 kcal</div>
+                </div>
+                <span class="entry-cal" style="color:#f97316">380</span>
+                <span class="entry-delete" onclick="deleteEntry('entry-oats','breakfast-total')">🗑</span>
+              </div>
+            </div>
+            <div class="add-food-btn" onclick="focusSearch()">+ Add food to Breakfast</div>
+          </div>
+        </div>
+
+        <!-- Lunch -->
+        <div class="meal-section">
+          <div class="meal-card">
+            <div class="meal-header">
+              <div class="meal-icon-wrap" style="background:#f0fdf4">☀️</div>
+              <h4>Lunch</h4>
+              <span class="meal-pill" style="background:#dcfce7;color:#15803d;">290 kcal</span>
+            </div>
+            <div class="meal-entries">
+              <div class="meal-entry" id="entry-salad">
+                <div class="entry-dot" style="background:#22c55e"></div>
+                <div class="entry-info">
+                  <div class="entry-name">Greek Salad</div>
+                  <div class="entry-sub">1 bowl · 290 kcal</div>
+                </div>
+                <span class="entry-cal" style="color:#22c55e">290</span>
+                <span class="entry-delete" onclick="deleteEntry('entry-salad','lunch-total')">🗑</span>
+              </div>
+            </div>
+            <div class="add-food-btn" onclick="focusSearch()">+ Add food to Lunch</div>
+          </div>
+        </div>
+
+        <!-- Dinner -->
+        <div class="meal-section">
+          <div class="meal-card">
+            <div class="meal-header">
+              <div class="meal-icon-wrap" style="background:#fdf4ff">🌙</div>
+              <h4>Dinner</h4>
+              <span class="meal-pill" style="background:#fdf4ff;color:#9333ea;">530 kcal</span>
+            </div>
+            <div class="meal-entries">
+              <div class="meal-entry" id="entry-chicken">
+                <div class="entry-dot" style="background:#a855f7"></div>
+                <div class="entry-info">
+                  <div class="entry-name">Grilled Chicken Rice</div>
+                  <div class="entry-sub">1 plate · 530 kcal</div>
+                </div>
+                <span class="entry-cal" style="color:#a855f7">530</span>
+                <span class="entry-delete" onclick="deleteEntry('entry-chicken','dinner-total')">🗑</span>
+              </div>
+            </div>
+            <div class="add-food-btn" onclick="focusSearch()">+ Add food to Dinner</div>
+          </div>
+        </div>
+
+        <!-- Snacks -->
+        <div class="meal-section">
+          <div class="meal-card">
+            <div class="meal-header">
+              <div class="meal-icon-wrap" style="background:#eff6ff">🍃</div>
+              <h4>Snacks</h4>
+              <span class="meal-pill" style="background:#eff6ff;color:#1d4ed8;">220 kcal</span>
+            </div>
+            <div class="meal-entries">
+              <div class="meal-entry" id="entry-banana">
+                <div class="entry-dot" style="background:#3b82f6"></div>
+                <div class="entry-info">
+                  <div class="entry-name">Banana + Almonds</div>
+                  <div class="entry-sub">1 serving · 220 kcal</div>
+                </div>
+                <span class="entry-cal" style="color:#3b82f6">220</span>
+                <span class="entry-delete" onclick="deleteEntry('entry-banana','snack-total')">🗑</span>
+              </div>
+            </div>
+            <div class="add-food-btn" onclick="focusSearch()">+ Add food to Snacks</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Daily total bar -->
+    <div class="daily-bar">
+      <div class="daily-cell"><span class="dv" style="color:#22c55e">1,420</span><span class="dl">kcal</span></div>
+      <div class="daily-cell"><span class="dv" style="color:#3b82f6">98g</span><span class="dl">protein</span></div>
+      <div class="daily-cell"><span class="dv" style="color:#f97316">162g</span><span class="dl">carbs</span></div>
+      <div class="daily-cell"><span class="dv" style="color:#ef4444">38g</span><span class="dl">fat</span></div>
+    </div>
+
+    <div class="nav-bar">
+      <div class="nav-item" onclick="goTo('dashboard')"><div class="nav-icon">🏠</div><span class="nav-label">Home</span></div>
+      <div class="nav-item active" onclick="goTo('foodlog')"><div class="nav-icon">🍽️</div><span class="nav-label">Log</span></div>
+      <div class="nav-item" onclick="goTo('coach')"><div class="nav-icon">🤖</div><span class="nav-label">Coach</span></div>
+      <div class="nav-item" onclick="goTo('analytics')"><div class="nav-icon">📊</div><span class="nav-label">Analytics</span></div>
+      <div class="nav-item" onclick="showToast('Profile coming soon!')"><div class="nav-icon">👤</div><span class="nav-label">Profile</span></div>
+    </div>
+  </div>
+
+  <!-- ════════════ SCREEN: COACH ════════════ -->
+  <div class="screen" id="screen-coach">
+    <div class="coach-header">
+      <div style="display:flex;align-items:center;gap:10px;padding-top:4px">
+        <span onclick="goTo('dashboard')" style="font-size:22px;cursor:pointer;color:#fff">←</span>
+        <div>
+          <h1>AI Coach 🤖</h1>
+          <p>Powered by Claude</p>
+        </div>
+      </div>
+      <div class="coach-online">Online · Ready to help</div>
+    </div>
+
+    <div class="chat-scroll" id="chatScroll">
+      <div class="bubble ai">
+        <div>Hey Aditya! 👋 I've reviewed your nutrition data. You're doing great — 5-day streak! Here's what I see:</div>
+        <div style="margin-top:8px;background:#f0fdf4;border-radius:12px;padding:10px;font-size:13px">
+          ✅ <strong>Protein</strong> on track (65% of goal)<br>
+          ⚠️ <strong>Calories</strong> 580 remaining — try adding a protein-rich snack<br>
+          💡 <strong>Tip:</strong> Your deep sleep is low (1.2h) — try avoiding screens 1h before bed
+        </div>
+        <div class="chip-row">
+          <div class="chip" onclick="sendMessage('Why am I not losing weight?')">Why no weight loss?</div>
+          <div class="chip" onclick="sendMessage('What should I eat for dinner?')">Dinner ideas</div>
+          <div class="chip" onclick="sendMessage('Show my weekly analysis')">Weekly report</div>
+        </div>
+        <div class="timestamp">9:41 AM</div>
+      </div>
+    </div>
+
+    <div class="chat-input-row">
+      <textarea class="chat-input" id="chatInput" placeholder="Ask your coach anything…" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage()}"></textarea>
+      <button class="send-btn" onclick="sendChatMessage()">↑</button>
+    </div>
+  </div>
+
+  <!-- ════════════ SCREEN: ANALYTICS ════════════ -->
+  <div class="screen" id="screen-analytics">
+    <div class="analytics-scroll">
+      <div style="display:flex;align-items:center;gap:10px;padding-top:4px;margin-bottom:4px">
+        <span onclick="goTo('dashboard')" style="font-size:22px;cursor:pointer">←</span>
+        <h1 class="analytics-title" style="margin-bottom:0">Analytics 📊</h1>
+      </div>
+
+      <!-- 30-day avg stat cards -->
+      <div class="stat-row card-anim">
+        <div class="stat-card">
+          <div class="ico">🔥</div>
+          <div class="sv" style="color:#22c55e">1,810</div>
+          <div class="sl">Avg kcal/day</div>
+        </div>
+        <div class="stat-card">
+          <div class="ico">💪</div>
+          <div class="sv" style="color:#3b82f6">118g</div>
+          <div class="sl">Avg protein</div>
+        </div>
+        <div class="stat-card">
+          <div class="ico">📅</div>
+          <div class="sv" style="color:#a855f7">24/30</div>
+          <div class="sl">Days logged</div>
+        </div>
+      </div>
+
+      <!-- Calorie trend chart -->
+      <div class="chart-card card-anim">
+        <div class="section-hdr" style="margin-bottom:0">
+          <h3>Calorie Trend</h3>
+          <span class="pill" style="background:#dcfce7;color:#15803d">Goal 2,000</span>
+        </div>
+        <div class="bar-chart" id="calChart"></div>
+      </div>
+
+      <!-- Weight trend -->
+      <div class="chart-card card-anim">
+        <div class="section-hdr" style="margin-bottom:8px">
+          <h3>Weight Trend</h3>
+          <span class="pill" style="background:#ffe4e6;color:#b91c1c">-0.4 kg/wk</span>
+        </div>
+        <svg viewBox="0 0 300 80" preserveAspectRatio="none" style="width:100%;height:80px">
+          <defs>
+            <linearGradient id="wGrad" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#22c55e" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#22c55e" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d="M0,60 L30,55 L60,50 L90,48 L120,45 L150,43 L180,40 L210,38 L240,35 L270,32 L300,30 L300,80 L0,80 Z" fill="url(#wGrad)"/>
+          <path d="M0,60 L30,55 L60,50 L90,48 L120,45 L150,43 L180,40 L210,38 L240,35 L270,32 L300,30" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="300" cy="30" r="5" fill="#22c55e"/>
+          <text x="280" y="22" font-size="10" fill="#15803d" font-weight="700" font-family="Inter">76.2kg</text>
+        </svg>
+      </div>
+
+      <!-- Macro split -->
+      <div class="chart-card card-anim">
+        <h3 style="margin-bottom:14px">Macro Split · Last 14 days</h3>
+        <div style="display:flex;gap:6px;align-items:flex-end;height:80px" id="macroChart"></div>
+        <div style="display:flex;gap:16px;margin-top:10px;font-size:11px;font-weight:600">
+          <span style="color:#3b82f6">● Protein</span>
+          <span style="color:#f97316">● Carbs</span>
+          <span style="color:#ef4444">● Fat</span>
+        </div>
+      </div>
+
+      <!-- Sleep summary -->
+      <div class="card card-anim">
+        <div class="section-hdr" style="margin-bottom:14px">
+          <h3>😴 Last Night's Sleep</h3>
+          <span class="pill" style="background:#ede9fe;color:#6d28d9">82 · Good</span>
+        </div>
+        <div class="sleep-ring-row">
+          <div class="sleep-ring">
+            <svg width="90" height="90" viewBox="0 0 90 90">
+              <circle cx="45" cy="45" r="38" fill="none" stroke="#ede9fe" stroke-width="8"/>
+              <circle cx="45" cy="45" r="38" fill="none" stroke="#6366f1" stroke-width="8" stroke-linecap="round"
+                stroke-dasharray="238.76" stroke-dashoffset="43" transform="rotate(-90 45 45)"/>
+            </svg>
+            <div class="sleep-ring-label"><span class="score">82</span><span class="sl">score</span></div>
+          </div>
+          <div class="sleep-bars">
+            <div class="sleep-bar-row"><span class="lbl">Deep</span><div class="sleep-bar-track"><div class="sleep-bar-fill" style="width:16%;background:#312e81;"></div></div><span class="dur">1.2h</span></div>
+            <div class="sleep-bar-row"><span class="lbl">REM</span><div class="sleep-bar-track"><div class="sleep-bar-fill" style="width:24%;background:#6366f1;"></div></div><span class="dur">1.8h</span></div>
+            <div class="sleep-bar-row"><span class="lbl">Core</span><div class="sleep-bar-track"><div class="sleep-bar-fill" style="width:60%;background:#818cf8;"></div></div><span class="dur">4.5h</span></div>
+            <div class="sleep-bar-row"><span class="lbl">Awake</span><div class="sleep-bar-track"><div class="sleep-bar-fill" style="width:4%;background:#e5e7eb;"></div></div><span class="dur">0.3h</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-bar">
+      <div class="nav-item" onclick="goTo('dashboard')"><div class="nav-icon">🏠</div><span class="nav-label">Home</span></div>
+      <div class="nav-item" onclick="goTo('foodlog')"><div class="nav-icon">🍽️</div><span class="nav-label">Log</span></div>
+      <div class="nav-item" onclick="goTo('coach')"><div class="nav-icon">🤖</div><span class="nav-label">Coach</span></div>
+      <div class="nav-item active" onclick="goTo('analytics')"><div class="nav-icon">📊</div><span class="nav-label">Analytics</span></div>
+      <div class="nav-item" onclick="showToast('Profile coming soon!')"><div class="nav-icon">👤</div><span class="nav-label">Profile</span></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+</div><!-- /phone -->
+</div><!-- /shell -->
+
+<script>
+// ── Navigation ──────────────────────────────────────────────
+
+const screenMap = {
+  login:     'screen-login',
+  dashboard: 'screen-dashboard',
+  foodlog:   'screen-foodlog',
+  coach:     'screen-coach',
+  analytics: 'screen-analytics',
+};
+let current = 'login';
+
+function goTo(name) {
+  if (name === current) return;
+  const prev = document.getElementById(screenMap[current]);
+  const next = document.getElementById(screenMap[name]);
+  prev.classList.add('exit');
+  prev.classList.remove('active');
+  setTimeout(() => { prev.classList.remove('exit'); }, 400);
+  next.style.transform = 'translateX(60px)';
+  next.classList.add('active');
+  requestAnimationFrame(() => { next.style.transform = ''; });
+  current = name;
+
+  // Update nav active state
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+  // Trigger screen-specific init
+  if (name === 'dashboard')  initDashboard();
+  if (name === 'analytics')  initAnalytics();
+}
+
+// ── Toast ──────────────────────────────────────────────────
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// ── Dashboard init ─────────────────────────────────────────
+
+function initDashboard() {
+  // Animate ring
+  setTimeout(() => {
+    const ring = document.getElementById('dashRing');
+    if (ring) {
+      const progress = 1420 / 2000;
+      ring.style.strokeDashoffset = 314 * (1 - progress);
+    }
+  }, 100);
+
+  // Streak dots
+  const days = ['M','T','W','T','F','S','S'];
+  const logged = [true, true, true, true, true, false, false]; // today=Wed=index2 from end of last week
+  const todayIdx = 4; // Wednesday in our week
+  const dotsEl   = document.getElementById('chainDots');
+  const labelsEl = document.getElementById('chainLabels');
+  if (!dotsEl) return;
+  dotsEl.innerHTML = '';
+  labelsEl.innerHTML = '';
+  days.forEach((d, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'chain-dot ' + (i < 5 ? 'filled' : i === 5 ? 'today' : 'empty');
+    dot.textContent = i < 5 ? '✓' : '';
+    dotsEl.appendChild(dot);
+    const lbl = document.createElement('span');
+    lbl.textContent = d;
+    labelsEl.appendChild(lbl);
+  });
+}
+
+// ── Analytics init ─────────────────────────────────────────
+
+function initAnalytics() {
+  // Calorie bar chart
+  const calData = [1620,1850,0,1940,1780,1420,1600,1910,0,1750,1830,1550,1420,2010];
+  const calEl = document.getElementById('calChart');
+  if (!calEl || calEl.children.length > 0) return;
+  const max = 2200;
+  calData.forEach((v, i) => {
+    const col = document.createElement('div');
+    col.className = 'bar-col';
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    const h = v === 0 ? 4 : Math.max(6, (v/max)*90);
+    bar.style.height = h + 'px';
+    bar.style.background = v === 0 ? '#f3f4f6' : `linear-gradient(to top, #15803d, #4ade80)`;
+    const lbl = document.createElement('div');
+    lbl.className = 'lbl';
+    lbl.textContent = ['M','T','W','T','F','S','S','M','T','W','T','F','S','T'][i] || '';
+    col.appendChild(bar);
+    col.appendChild(lbl);
+    calEl.appendChild(col);
+  });
+
+  // Macro stacked bars
+  const macroEl = document.getElementById('macroChart');
+  if (!macroEl || macroEl.children.length > 0) return;
+  const macroData = [
+    [40,110,30],[45,130,35],[42,115,32],[48,125,38],[44,118,33],
+    [50,140,40],[46,122,34],[43,112,31],[47,128,36],[41,108,29],
+    [49,135,37],[44,120,33],[46,125,35],[48,130,38]
+  ];
+  macroData.forEach((m, i) => {
+    const col = document.createElement('div');
+    col.style.cssText = 'flex:1;display:flex;flex-direction:column;gap:2px;align-items:stretch;height:100%';
+    const total = m.reduce((a,b) => a+b, 0);
+    const colors = ['#3b82f6','#f97316','#ef4444'];
+    m.forEach((v, ci) => {
+      const seg = document.createElement('div');
+      seg.style.cssText = `flex:${v};background:${colors[ci]};border-radius:3px;min-height:3px;opacity:0.85`;
+      col.appendChild(seg);
+    });
+    const lbl = document.createElement('div');
+    lbl.style.cssText = 'font-size:8px;color:#9ca3af;text-align:center;margin-top:3px;font-weight:500';
+    lbl.textContent = ['M','T','W','T','F','S','S','M','T','W','T','F','S','T'][i] || '';
+    macroEl.appendChild(col);
+  });
+  const last = document.createElement('div');
+  macroEl.appendChild(last);
+}
+
+// ── Food log ───────────────────────────────────────────────
+
+const foods = [
+  { name: 'Apple',            cal: 95,  icon: '🍎', sub: '1 medium' },
+  { name: 'Chicken Breast',   cal: 165, icon: '🍗', sub: '100g cooked' },
+  { name: 'Brown Rice',       cal: 216, icon: '🍚', sub: '1 cup cooked' },
+  { name: 'Greek Yogurt',     cal: 100, icon: '🥛', sub: '170g plain' },
+  { name: 'Avocado',          cal: 234, icon: '🥑', sub: '1 whole' },
+  { name: 'Broccoli',         cal: 55,  icon: '🥦', sub: '1 cup' },
+  { name: 'Almond Butter',    cal: 196, icon: '🥜', sub: '2 tbsp' },
+  { name: 'Salmon Fillet',    cal: 280, icon: '🐟', sub: '150g' },
+  { name: 'Sweet Potato',     cal: 130, icon: '🍠', sub: '1 medium' },
+  { name: 'Blueberries',      cal: 84,  icon: '🫐', sub: '1 cup' },
+];
+
+let searchTimeout;
+function handleSearch(val) {
+  clearTimeout(searchTimeout);
+  const resultsEl = document.getElementById('search-results');
+  const listEl    = document.getElementById('result-list');
+  if (!val || val.length < 2) { resultsEl.style.display = 'none'; return; }
+  searchTimeout = setTimeout(() => {
+    const matches = foods.filter(f => f.name.toLowerCase().includes(val.toLowerCase()));
+    if (matches.length === 0) { resultsEl.style.display = 'none'; return; }
+    listEl.innerHTML = '';
+    matches.forEach(f => {
+      const row = document.createElement('div');
+      row.className = 'meal-entry';
+      row.style.cursor = 'pointer';
+      row.innerHTML = `
+        <div style="font-size:22px">${f.icon}</div>
+        <div class="entry-info"><div class="entry-name">${f.name}</div><div class="entry-sub">${f.sub}</div></div>
+        <span class="entry-cal" style="color:#22c55e">${f.cal}</span>
+        <span style="font-size:20px;cursor:pointer;padding:4px;border-radius:8px;background:#dcfce7" onclick="addFood('${f.name}',${f.cal},'${f.icon}','${f.sub}')">+</span>
+      `;
+      listEl.appendChild(row);
+    });
+    resultsEl.style.display = 'block';
+  }, 300);
+}
+
+function focusSearch() {
+  const inp = document.getElementById('searchInput');
+  if (inp) inp.focus();
+}
+
+function addFood(name, cal, icon, sub) {
+  showToast(`✅ Added ${name} to log!`);
+  document.getElementById('searchInput').value = '';
+  document.getElementById('search-results').style.display = 'none';
+}
+
+function deleteEntry(entryId, mealTotal) {
+  const el = document.getElementById(entryId);
+  if (!el) return;
+  el.style.transition = 'all .3s ease';
+  el.style.opacity = '0';
+  el.style.transform = 'translateX(40px)';
+  setTimeout(() => el.remove(), 320);
+  showToast('🗑 Entry removed');
+}
+
+// ── Coach ──────────────────────────────────────────────────
+
+const aiReplies = {
+  'Why am I not losing weight?': `Based on your data, you're averaging 1,810 kcal/day vs a 1,700 kcal target. You're in a slight surplus on weekends (avg +350 kcal). Try logging consistently on weekends and consider a 15-min post-dinner walk. 📊`,
+  'What should I eat for dinner?': `You have ~580 kcal and 52g protein remaining. I'd suggest:\n\n🐟 **Salmon + quinoa + greens** (520 kcal, 42g P)\n🍗 **Chicken stir-fry with veggies** (490 kcal, 45g P)\n\nBoth hit your macros perfectly!`,
+  'Show my weekly analysis': `**Weekly Summary (Apr 17-23):**\n✅ Logged 5/7 days\n📊 Avg 1,810 kcal/day\n💪 Protein avg 118g (goal: 150g)\n⚠️ Weekend calories 22% higher\n\nOverall score: **74/100 — Good!**`,
+};
+
+const defaultReplies = [
+  'Great question! Based on your nutrition data, I recommend focusing on hitting your protein goal — you\'re at 65% today. Try adding a protein shake or Greek yogurt as a snack. 💪',
+  'Looking at your patterns, your best logged days are Tuesday-Thursday. Keep that consistency going into the weekend! 🎯',
+  'Your sleep quality (82/100) is good! Deep sleep is slightly low at 1.2h — try a consistent bedtime around 10:30pm. 😴',
+];
+let replyIdx = 0;
+
+function sendMessage(text) {
+  const input = document.getElementById('chatInput');
+  input.value = text;
+  sendChatMessage();
+}
+
+function sendChatMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  const scroll = document.getElementById('chatScroll');
+
+  // User bubble
+  const userBubble = document.createElement('div');
+  userBubble.className = 'bubble user';
+  userBubble.innerHTML = `${text}<div class="timestamp">${timeNow()}</div>`;
+  scroll.appendChild(userBubble);
+  scroll.scrollTop = scroll.scrollHeight;
+
+  // Typing indicator
+  const typing = document.createElement('div');
+  typing.className = 'bubble ai';
+  typing.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+  scroll.appendChild(typing);
+  scroll.scrollTop = scroll.scrollHeight;
+
+  setTimeout(() => {
+    typing.remove();
+    const ai = document.createElement('div');
+    ai.className = 'bubble ai';
+    const reply = aiReplies[text] || defaultReplies[replyIdx++ % defaultReplies.length];
+    ai.innerHTML = `${reply.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}<div class="timestamp">${timeNow()}</div>`;
+    scroll.appendChild(ai);
+    scroll.scrollTop = scroll.scrollHeight;
+  }, 1600);
+}
+
+function timeNow() {
+  return new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+}
+
+// ── Boot ───────────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Set initial screen active
+  document.getElementById('screen-login').classList.add('active');
+});
+</script>
+</body>
+</html>
