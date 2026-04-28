@@ -1,5 +1,4 @@
 import SwiftUI
-import AuthenticationServices
 
 struct SignInView: View {
     var coordinator: AuthCoordinator
@@ -60,38 +59,9 @@ struct SignInView: View {
 
                 // ── Sign-in section ────────────────────────────────────────
                 VStack(spacing: 16) {
-                    SignInWithAppleButton(.signIn) { request in
-                        request.requestedScopes = [.fullName, .email]
-                    } onCompletion: { result in
-                        handleAppleSignIn(result: result)
-                    }
-                    .signInWithAppleButtonStyle(.black)
-                    .frame(height: 54)
-                    .clipShape(RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous))
-                    .shadow(color: .black.opacity(0.15), radius: 10, y: 4)
-                    .padding(.horizontal, 28)
-
-                    Text("We'll never share your data with third parties.")
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                        .multilineTextAlignment(.center)
 
                     // ── Guest / Demo Login ─────────────────────────────────
                     VStack(spacing: 10) {
-                        HStack {
-                            Rectangle()
-                                .fill(Color(.separator))
-                                .frame(height: 0.5)
-                            Text("OR")
-                                .font(.caption2.weight(.semibold))
-                                .foregroundStyle(.tertiary)
-                                .padding(.horizontal, 8)
-                            Rectangle()
-                                .fill(Color(.separator))
-                                .frame(height: 0.5)
-                        }
-                        .padding(.horizontal, 28)
-
                         Button {
                             Haptics.medium()
                             Task {
@@ -172,48 +142,7 @@ struct SignInView: View {
         withAnimation(DS.Anim.entrance.delay(0.28)) { buttonAppeared = true }
     }
 
-    private func handleAppleSignIn(result: Result<ASAuthorization, Error>) {
-        switch result {
-        case .success(let auth):
-            guard let credential = auth.credential as? ASAuthorizationAppleIDCredential,
-                  let tokenData = credential.identityToken,
-                  let identityToken = String(data: tokenData, encoding: .utf8)
-            else {
-                viewModel.errorMessage = "Failed to retrieve Apple ID credentials."
-                return
-            }
 
-            let userIdentifier = credential.user
-            let displayName: String? = {
-                guard let name = credential.fullName else { return nil }
-                let formatted = PersonNameComponentsFormatter().string(from: name)
-                return formatted.isEmpty ? nil : formatted
-            }()
-            let email = credential.email
-
-            Task {
-                if let result = await viewModel.signInWithApple(
-                    identityToken: identityToken,
-                    userIdentifier: userIdentifier,
-                    displayName: displayName,
-                    email: email
-                ) {
-                    coordinator.appCoordinator.handleSignIn(
-                        accessToken: result.accessToken,
-                        refreshToken: result.refreshToken,
-                        userId: result.userId,
-                        isNewUser: result.isNewUser
-                    )
-                }
-            }
-
-        case .failure(let error):
-            let asError = error as? ASAuthorizationError
-            if asError?.code != .canceled {
-                viewModel.errorMessage = error.localizedDescription
-            }
-        }
-    }
 }
 
 #Preview {
