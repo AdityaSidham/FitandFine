@@ -35,11 +35,23 @@ actor NetworkClient {
     static let shared = NetworkClient()
 
     private let baseURL: String
-    nonisolated var baseURLString: String { "http://100.64.34.78:8000/api/v1" }
+    nonisolated var baseURLString: String {
+        #if targetEnvironment(simulator)
+        return "http://localhost:8000/api/v1"
+        #else
+        return "http://100.64.34.78:8000/api/v1"
+        #endif
+    }
     private let decoder: JSONDecoder
     private let encoder: JSONEncoder
 
-    private init(baseURL: String = "http://100.64.34.78:8000/api/v1") {
+    private init(baseURL: String = {
+        #if targetEnvironment(simulator)
+        return "http://localhost:8000/api/v1"
+        #else
+        return "http://100.64.34.78:8000/api/v1"
+        #endif
+    }()) {
         self.baseURL = baseURL
 
         let dec = JSONDecoder()
