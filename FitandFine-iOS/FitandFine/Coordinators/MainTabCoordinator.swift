@@ -24,6 +24,6 @@ struct MainTabView: View {
                     Label("Profile", systemImage: "person.fill")
                 }
         }
-        .tint(.green)
+        .tint(Color.ffSage)
     }
 }
