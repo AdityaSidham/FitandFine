@@ -5,18 +5,27 @@ import SwiftUI
 enum DS {
     // MARK: Colours
     enum Color {
-        static let accent        = SwiftUI.Color(red: 0.13, green: 0.76, blue: 0.37)
-        static let accentDark    = SwiftUI.Color(red: 0.09, green: 0.51, blue: 0.27)
-        static let accentMid     = SwiftUI.Color(red: 0.29, green: 0.87, blue: 0.50)
-        static let accentHero    = SwiftUI.Color(red: 0.07, green: 0.50, blue: 0.24)  // dark hero card
-        static let protein       = SwiftUI.Color(red: 0.23, green: 0.51, blue: 0.96)
-        static let carbs         = SwiftUI.Color(red: 0.98, green: 0.45, blue: 0.09)
-        static let fat           = SwiftUI.Color(red: 0.94, green: 0.27, blue: 0.27)
+        // Core sage palette
+        static let accent        = SwiftUI.Color(red: 0.525, green: 0.675, blue: 0.533) // sage #869F88
+        static let accentDark    = SwiftUI.Color(red: 0.345, green: 0.475, blue: 0.357) // deep sage
+        static let accentMid     = SwiftUI.Color(red: 0.660, green: 0.810, blue: 0.665) // light sage
+        static let accentHero    = SwiftUI.Color(red: 0.400, green: 0.565, blue: 0.420) // medium sage card
+        // Macro colours — softened for the 2026 palette
+        static let protein       = SwiftUI.Color(red: 0.365, green: 0.620, blue: 0.820) // clear sky blue
+        static let carbs         = SwiftUI.Color(red: 0.950, green: 0.640, blue: 0.380) // warm amber
+        static let fat           = SwiftUI.Color(red: 0.945, green: 0.490, blue: 0.490) // rose
+        // Coach
         static let coachPurple   = SwiftUI.Color(red: 0.49, green: 0.23, blue: 0.93)
         static let coachPurpleDk = SwiftUI.Color(red: 0.36, green: 0.16, blue: 0.75)
+        // Surfaces
         static let surface       = SwiftUI.Color(.systemBackground)
         static let surfaceRaise  = SwiftUI.Color(.secondarySystemBackground)
-        static let bgScreen      = SwiftUI.Color(red: 0.94, green: 0.99, blue: 0.96)  // #f0fdf4
+        static let bgScreen      = SwiftUI.Color(red: 0.965, green: 0.965, blue: 0.957) // warm white #F6F6F4
+        // Semantic helpers
+        static let divider       = SwiftUI.Color(.separator).opacity(0.55)
+        static let textPrimary   = SwiftUI.Color(.label)
+        static let textSecondary = SwiftUI.Color(.secondaryLabel)
+        static let textTertiary  = SwiftUI.Color(.tertiaryLabel)
     }
 
     // MARK: Radius
@@ -26,15 +35,26 @@ enum DS {
         static let md: CGFloat  = 16
         static let lg: CGFloat  = 20
         static let xl: CGFloat  = 24
-        static let xxl: CGFloat = 28
+        static let xxl: CGFloat = 30
     }
 
     // MARK: Shadow
     enum Shadow {
-        static let card   = ShadowConfig(color: .black.opacity(0.06), radius: 12, y: 4)
-        static let lifted = ShadowConfig(color: .black.opacity(0.10), radius: 20, y: 7)
-        static let float  = ShadowConfig(color: .black.opacity(0.13), radius: 28, y: 10)
-        static let green  = ShadowConfig(color: SwiftUI.Color(red: 0.13, green: 0.76, blue: 0.37).opacity(0.35), radius: 20, y: 8)
+        static let subtle = ShadowConfig(color: .black.opacity(0.04), radius: 8,  y: 2)
+        static let card   = ShadowConfig(color: .black.opacity(0.06), radius: 14, y: 4)
+        static let lifted = ShadowConfig(color: .black.opacity(0.09), radius: 22, y: 7)
+        static let float  = ShadowConfig(color: .black.opacity(0.12), radius: 30, y: 10)
+        static let green  = ShadowConfig(color: SwiftUI.Color(red: 0.525, green: 0.675, blue: 0.533).opacity(0.28), radius: 20, y: 8)
+    }
+
+    // MARK: Spacing
+    enum Space {
+        static let xs: CGFloat  = 4
+        static let sm: CGFloat  = 8
+        static let md: CGFloat  = 16
+        static let lg: CGFloat  = 24
+        static let xl: CGFloat  = 32
+        static let screenH: CGFloat = 20  // standard horizontal screen padding
     }
 
     // MARK: Animation
@@ -42,7 +62,7 @@ enum DS {
         static let spring     = Animation.spring(response: 0.45, dampingFraction: 0.72)
         static let springFast = Animation.spring(response: 0.32, dampingFraction: 0.75)
         static let smooth     = Animation.easeInOut(duration: 0.25)
-        static let ring       = Animation.spring(response: 0.65, dampingFraction: 0.8)
+        static let ring       = Animation.spring(response: 0.70, dampingFraction: 0.82)
         static let entrance   = Animation.spring(response: 0.5, dampingFraction: 0.78)
     }
 
@@ -54,12 +74,20 @@ enum DS {
         )
     }
 
+    /// Soft sage ring gradient — used in CalorieRingView
+    static var ringGradient: AngularGradient {
+        AngularGradient(
+            colors: [Color.accentMid, Color.accent, Color.accentDark, Color.accentMid],
+            center: .center
+        )
+    }
+
     static var heroGradient: LinearGradient {
         LinearGradient(
             colors: [
-                SwiftUI.Color(red: 0.09, green: 0.64, blue: 0.30),
-                SwiftUI.Color(red: 0.06, green: 0.44, blue: 0.21),
-                SwiftUI.Color(red: 0.04, green: 0.35, blue: 0.18),
+                SwiftUI.Color(red: 0.60, green: 0.75, blue: 0.62),
+                SwiftUI.Color(red: 0.48, green: 0.64, blue: 0.50),
+                SwiftUI.Color(red: 0.36, green: 0.50, blue: 0.38),
             ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
@@ -154,16 +182,22 @@ enum Haptics {
 struct GreenButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.headline)
+            .font(.system(.headline, design: .rounded, weight: .semibold))
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
+            .padding(.vertical, 17)
             .background(
-                DS.accentGradient
-                    .opacity(configuration.isPressed ? 0.75 : 1.0)
+                ZStack {
+                    DS.accentGradient
+                    if configuration.isPressed {
+                        Color.black.opacity(0.08)
+                    }
+                }
             )
-            .clipShape(RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous))
-            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .clipShape(RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
+            .shadow(color: DS.Color.accent.opacity(configuration.isPressed ? 0.15 : 0.35),
+                    radius: configuration.isPressed ? 6 : 12, y: configuration.isPressed ? 2 : 5)
+            .scaleEffect(configuration.isPressed ? 0.975 : 1.0)
             .animation(DS.Anim.springFast, value: configuration.isPressed)
     }
 }
@@ -287,7 +321,7 @@ struct FruitPatternBackground: View {
     var body: some View {
         Canvas { context, size in
             let green = GraphicsContext.Shading.color(
-                Color(red: 0.13, green: 0.76, blue: 0.37).opacity(opacity)
+                Color(red: 0.545, green: 0.686, blue: 0.553).opacity(opacity)
             )
             let lw: CGFloat = 1.5
             let spacing: CGFloat = 90
