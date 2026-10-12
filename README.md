@@ -1,443 +1,311 @@
-# FitandFine 🥑
+<a id="readme-top"></a>
 
-> **AI-powered nutrition tracking & wellness coaching for iOS**
+<div align="center">
 
-FitandFine is a production-grade iOS application that combines barcode scanning, OCR nutrition label parsing, Apple Health integration, and a multi-agent Claude AI system into a single, beautifully designed nutrition companion. It goes beyond calorie counting — adapting your targets intelligently and coaching you with your real data.
+<a href="https://adityasidham.site/FitandFine.html"><img src=".github/readme/banner.jpg" alt="FitandFine. Nutrition tracking for iOS that adapts to what you actually eat. Built by Aditya Sidham." width="100%"></a>
 
----
+<br>
 
-## Table of Contents
+![iOS 17.6+](https://img.shields.io/badge/iOS-17.6%2B-ECE9E1?style=flat-square&logo=apple&logoColor=ECE9E1&labelColor=0D1424)
+![Swift](https://img.shields.io/badge/Swift-SwiftUI%20%2B%20SwiftData-F05138?style=flat-square&logo=swift&logoColor=white&labelColor=0D1424)
+![FastAPI](https://img.shields.io/badge/FastAPI-async-009688?style=flat-square&logo=fastapi&logoColor=white&labelColor=0D1424)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white&labelColor=0D1424)
+![Redis](https://img.shields.io/badge/Redis-7-FF4438?style=flat-square&logo=redis&logoColor=white&labelColor=0D1424)
+![Celery](https://img.shields.io/badge/Celery-workers-37814A?style=flat-square&logo=celery&logoColor=white&labelColor=0D1424)
+![Gemini](https://img.shields.io/badge/Gemini-2.0%20Flash-8E75B2?style=flat-square&logo=googlegemini&logoColor=white&labelColor=0D1424)
 
+**[Case study](https://adityasidham.site/FitandFine.html)** &nbsp;|&nbsp; **[Screens](#screens)** &nbsp;|&nbsp; **[Architecture](#architecture)** &nbsp;|&nbsp; **[AI agents](#the-four-ai-agents)** &nbsp;|&nbsp; **[Run it](#getting-started)** &nbsp;|&nbsp; **[API](#api-reference)**
+
+</div>
+
+<br>
+
+Most nutrition apps are good at recording what happened. They're less useful when a routine changes, the first calorie estimate is wrong, or logging gets too slow to keep up. **FitandFine closes the gap between tracking and adapting.**
+
+It's a native SwiftUI app with a FastAPI backend. Scan a barcode or photograph a label, log meals in seconds, pull steps and sleep from Apple Health, and get a coach that answers from your own food log. Four AI agents read labels, review your week, suggest meals that fit what's left of your macros, and propose calorie changes that you approve before anything moves.
+
+I designed and built all of it, solo: the iOS app, the backend, the data model and the AI layer.
+
+| **&lt;500 ms** | **50,000+** | **85%+** | **4** |
+|:---:|:---:|:---:|:---:|
+| barcode to food card | USDA food records | label-field accuracy | AI agents |
+
+<details>
+<summary><b>Table of contents</b></summary>
+
+<br>
+
+- [Screens](#screens)
 - [Features](#features)
-- [Screenshots](#screenshots)
 - [Architecture](#architecture)
+- [The four AI agents](#the-four-ai-agents)
 - [Requirements](#requirements)
-- [Getting Started](#getting-started)
-  - [Backend Setup](#backend-setup)
-  - [iOS App Setup](#ios-app-setup)
-- [Environment Variables](#environment-variables)
-- [AI Agent System](#ai-agent-system)
-- [API Reference](#api-reference)
-- [Project Structure](#project-structure)
-- [Tech Stack](#tech-stack)
+- [Getting started](#getting-started)
+- [Environment variables](#environment-variables)
+- [API reference](#api-reference)
+- [Project structure](#project-structure)
+- [Tech stack](#tech-stack)
 - [Roadmap](#roadmap)
-- [License](#license)
+- [Author](#author)
 
----
+</details>
+
+## Screens
+
+<p align="center">
+  <img src=".github/readme/screens.jpg" alt="Four FitandFine screens on iPhone: the dashboard with calorie ring, macros and streak; the food log grouped by meal; the FitCoach chat answering a protein question from the user's own logs; and analytics with a 30-day calorie trend and macro split" width="100%">
+</p>
+
+<details>
+<summary>Full-size simulator screenshots</summary>
+
+<br>
+
+| Dashboard | Food log | Food detail |
+|---|---|---|
+| ![Dashboard](screenshots/01-dashboard.png) | ![Food log](screenshots/02-food-log.png) | ![Food log detail](screenshots/03-food-log-detail.png) |
+
+| FitCoach | Analytics |
+|---|---|
+| ![AI coach](screenshots/04-coach.png) | ![Analytics](screenshots/05-analytics.png) |
+
+</details>
+
+<p align="right"><a href="#readme-top">Back to top</a></p>
 
 ## Features
 
-| Feature | Description |
+| Feature | What it does |
 |---|---|
-| **Barcode Scanner** | Real-time EAN/UPC barcode scanning via AVFoundation — food card loads in < 500ms |
-| **OCR Label Scanning** | Photograph any nutrition label → OpenCV + Tesseract → Claude AI extracts structured macros |
-| **AI Nutrition Coach** | Conversational Claude-powered coach answers questions using your actual food log data |
-| **Adaptive Calorie Targets** | Closed-loop system adjusts your daily target based on real weight trends vs predictions |
-| **Streak Psychology** | Chain-dot streak tracker with "Don't break the chain" motivation mechanics |
-| **Apple Health Integration** | Reads steps, active calories, and sleep data; writes nutrition entries back |
-| **Weekly Analysis Reports** | Diet Analysis Agent identifies adherence patterns, macro imbalances, and meal timing |
-| **Meal Recommendations** | Recommendation Agent suggests real meals to fill your remaining daily macros |
-| **Progress Evaluation** | Detects plateaus, differentiates adherence issues from metabolic adaptation, proposes goal adjustments |
-| **Offline Support** | SwiftData local cache keeps the app functional without a network connection |
-
----
-
-## Screenshots
-
-| Dashboard | Food Log | Food Detail |
-|---|---|---|
-| ![Dashboard](screenshots/01-dashboard.png) | ![Food Log](screenshots/02-food-log.png) | ![Food Log Detail](screenshots/03-food-log-detail.png) |
-
-| AI Coach | Analytics |
-|---|---|
-| ![AI Coach](screenshots/04-coach.png) | ![Analytics](screenshots/05-analytics.png) |
-
----
+| **Barcode scanner** | Real-time EAN/UPC scanning with AVFoundation. Lookups go Redis cache, then the local database, then Open Food Facts, then USDA FoodData Central, and land on a food card in under 500 ms. |
+| **Label scanning** | Photograph a nutrition label and Gemini Vision returns structured macros with a confidence score. High-confidence results save straight away; anything less goes to a review screen first. |
+| **FitCoach** | A multi-turn coach that streams answers over Server-Sent Events and grounds them in your logged food, goals and recent history. |
+| **Weekly analysis** | Reviews your last 7 days against your goal and returns findings rated info, warning or critical. |
+| **Meal suggestions** | Proposes real meals that fill the macros you have left today. |
+| **Adaptive targets** | Compares your actual weight trend with what your logged calories predict, spots plateaus, and proposes a specific change. Nothing applies until you confirm it. |
+| **Apple Health** | Reads steps, active calories and sleep through HealthKit. |
+| **Streaks** | A chain-dot streak tracker built around "don't break the chain." |
+| **Offline cache** | SwiftData keeps recent foods and logs available without a connection. |
 
 ## Architecture
 
-```
-iOS App (SwiftUI + MVVM-C)
-    │
-    ▼  HTTPS / REST + SSE streaming
-FastAPI Backend (Python, async)
-    ├── API Routers          (/auth, /foods, /logs, /goals, /ai, /analytics, /weight)
-    ├── Service Layer        (OCR, food DB, macro math, S3, cache)
-    ├── Agent Orchestrator   (routes requests to 4 specialized Claude agents)
-    ├── Repository Layer     (SQLAlchemy async → PostgreSQL)
-    └── Celery Workers       (OCR pipeline, weekly analysis scheduling)
-
-Infrastructure:
-    ├── PostgreSQL           (primary DB + read replica for analytics)
-    ├── Redis                (session cache, barcode lookup, Celery broker)
-    └── AWS S3               (nutrition label image storage)
-
-AI Agents (Claude API):
-    ├── Food Parser Agent    (OCR text → structured nutrition JSON)
-    ├── Diet Analysis Agent  (7-day log pattern analysis)
-    ├── Recommendation Agent (meal suggestions fitting remaining macros)
-    └── Progress Evaluator   (plateau detection, goal adjustment proposals)
+```mermaid
+flowchart LR
+    subgraph iOS["iOS app: SwiftUI + MVVM-C"]
+        V[Views] --> VM[ViewModels] --> NC[NetworkClient]
+        HK[HealthKit] --> VM
+        SD[(SwiftData cache)] <--> VM
+    end
+    NC -- "REST + SSE" --> API
+    subgraph BE["FastAPI backend"]
+        API[api/v1 routers] --> SVC[Services]
+        SVC --> REPO[Repositories]
+        API -. "label-scan jobs" .-> CEL[Celery workers]
+    end
+    REPO --> PG[(PostgreSQL 16)]
+    SVC <--> RD[(Redis 7)]
+    CEL --> RD
+    SVC --> GEM{{Gemini 2.0 Flash}}
+    CEL --> GEM
+    SVC --> EXT[Open Food Facts + USDA]
 ```
 
----
+- **iOS:** SwiftUI with MVVM plus coordinators for navigation, SwiftData for the offline cache, AVFoundation for the camera, HealthKit for activity and sleep, Swift Charts for analytics.
+- **Backend:** async FastAPI, layered as routers, services and repositories over SQLAlchemy 2.0 and PostgreSQL, with Alembic migrations and Pydantic v2 schemas.
+- **Async work:** label scans can run as Celery jobs on Redis, so the app never waits on a slow model call.
+- **Caching:** Redis holds barcode lookups for 72 hours, searches for 6, recommendations for 4 and weekly analyses for 8 days.
+
+<p align="right"><a href="#readme-top">Back to top</a></p>
+
+## The four AI agents
+
+Each agent is a service with its own system prompt and JSON output, running on Gemini 2.0 Flash through `app/services/ai_service.py`. The coach sits on top and talks to the user.
+
+| Agent | Service | Input | Output |
+|---|---|---|---|
+| **Label parser** | `label_scan_service.py` | A label photo (Gemini Vision) | Structured nutrition JSON and a confidence score. At 90% or higher it parses as high confidence, from 70% it asks for a review, and below that it asks you to verify. The Celery path auto-saves at 85% or higher. |
+| **Diet analysis** | `diet_analysis_service.py` | 7 days of logs and the active goal | Findings with severity ratings and an adherence picture |
+| **Recommendations** | `recommendation_service.py` | Remaining daily macros and preferences | Meal suggestions with macro math |
+| **Progress evaluator** | `progress_evaluator_service.py` | Weeks of weight logs and average intake | Linear-regression trend vs. expected change (7,700 kcal ≈ 1 kg), classified as on track, plateau or off track, plus a proposed calorie adjustment |
+| *FitCoach (on top)* | `coach_service.py` | Your message, history and log context | A streamed answer over SSE; conversations persist as JSONB |
+
+Goal changes from the progress evaluator only apply through `POST /ai/progress-evaluation/apply`, after the user confirms.
 
 ## Requirements
 
-### iOS App
-- **Xcode 15+**
-- **iOS 17+** (SwiftData requires iOS 17)
-- **Swift 5.9+**
-- A physical iPhone for camera features (barcode + label scanning require a real camera)
-- Apple Developer account (free tier works for personal testing via Xcode direct install)
+**iOS app**
+- Xcode 16 or later (the project was last opened in Xcode 26), deploying to iOS 17.6 or later
+- A physical iPhone for the camera features (barcode and label scanning)
+- A free Apple developer account is enough to install on your own device
 
-### Backend
-- **Python 3.11+**
-- **PostgreSQL 15+**
-- **Redis 7+**
-- **Tesseract OCR 5+** — `brew install tesseract` on macOS
-- **Anthropic API key** (Claude access)
-- **AWS account** with S3 bucket (for label image storage)
+**Backend**
+- Python 3.11 or later
+- PostgreSQL 15 or later and Redis 7 (or Docker)
+- A Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikey) (the free tier works)
+- A USDA FoodData Central API key (optional, for the USDA fallback)
 
----
-
-## Getting Started
-
-### 1. Clone the Repository
+## Getting started
 
 ```bash
 git clone https://github.com/AdityaSidham/FitandFine.git
 cd FitandFine
 ```
 
----
+### Backend
 
-### Backend Setup
-
-#### Step 1 — Install system dependencies
-
-```bash
-# macOS
-brew install postgresql redis tesseract
-
-# Ubuntu / Debian
-sudo apt-get install -y postgresql redis-server tesseract-ocr libpq-dev
-```
-
-#### Step 2 — Create and activate a Python virtual environment
+**Option A: Docker (Postgres, Redis, API and a Celery worker)**
 
 ```bash
 cd fitandfine-backend
-python3 -m venv .venv
-source .venv/bin/activate       # Windows: .venv\Scripts\activate
+cp .env.example .env          # add your GEMINI_API_KEY
+docker compose up --build
+docker compose exec api alembic upgrade head
 ```
 
-#### Step 3 — Install Python dependencies
+**Option B: run it yourself**
 
 ```bash
+cd fitandfine-backend
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-```
+cp .env.example .env          # fill in DATABASE_URL, SECRET_KEY, GEMINI_API_KEY
 
-#### Step 4 — Configure environment variables
-
-```bash
-cp .env.example .env
-# Edit .env with your values (see Environment Variables section below)
-```
-
-#### Step 5 — Start PostgreSQL and Redis
-
-```bash
-brew services start postgresql   # macOS
-brew services start redis
-
-# Or with Docker:
-docker-compose up -d postgres redis
-```
-
-#### Step 6 — Run database migrations
-
-```bash
+docker compose up -d db redis # or use local Postgres and Redis
 alembic upgrade head
-```
-
-#### Step 7 — Seed the food database (optional but recommended)
-
-```bash
-python scripts/seed_usda_foods.py
-# Imports ~50,000 common food items from USDA FoodData Central
-```
-
-#### Step 8 — Start the API server
-
-```bash
 uvicorn app.main:app --reload --port 8000
-# API docs available at http://localhost:8000/docs
+
+# in a second terminal, for queued label scans
+celery -A app.tasks.celery_app worker --loglevel=info --queues=ocr,analytics,default
 ```
 
-#### Step 9 — Start the Celery worker (for OCR processing)
+Interactive API docs are at `http://localhost:8000/docs`. To check every Phase 1 endpoint end to end, run `python test_phase1.py` while the server is up.
 
-```bash
-# In a separate terminal
-celery -A app.tasks.celery_app worker --loglevel=info
-```
-
-#### Step 10 — Start Celery Beat (for weekly scheduled analysis)
-
-```bash
-# In a separate terminal
-celery -A app.tasks.celery_app beat --loglevel=info
-```
-
----
-
-### iOS App Setup
-
-#### Step 1 — Open the project
+### iOS app
 
 ```bash
 open FitandFine-iOS/FitandFineIOS/FitandFineIOS.xcodeproj
 ```
 
-#### Step 2 — Configure the API base URL
+1. Select the `FitandFineIOS` target, open **Signing & Capabilities** and choose your team.
+2. The backend address switches automatically: `localhost:8000` in the simulator, and the LAN address in `Networking/NetworkClient.swift` on a device. Change that address to your Mac's IP.
+3. Press **⌘R**. On first launch the app asks for camera and Health access. **Continue as Guest** skips sign-in.
 
-Open `FitandFine-iOS/FitandFineIOS/FitandFineIOS/Networking/NetworkClient.swift` and update:
+The simulator runs everything except the camera.
 
-```swift
-private let baseURL = "http://localhost:8000/api/v1"
-// For a deployed backend, replace with your server URL:
-// private let baseURL = "https://api.yourdomain.com/api/v1"
-```
+## Environment variables
 
-#### Step 3 — Set your Team in Xcode
+`fitandfine-backend/.env` (start from [`.env.example`](fitandfine-backend/.env.example), then add `GEMINI_API_KEY`, which it doesn't list yet):
 
-1. Select the `FitandFineIOS` target in Xcode
-2. Go to **Signing & Capabilities**
-3. Set **Team** to your Apple Developer account
+| Variable | Required | Notes |
+|---|:---:|---|
+| `DATABASE_URL` | yes | `postgresql+asyncpg://fitandfine:fitandfine_dev@localhost:5432/fitandfine` |
+| `SECRET_KEY` | yes | 32+ characters, signs JWTs |
+| `GEMINI_API_KEY` | for AI | Powers the agents, the coach and label scanning |
+| `GEMINI_MODEL` |  | Defaults to `gemini-2.0-flash`, which Google listed for shutdown from June 1, 2026. Set a current Flash model if calls fail. |
+| `REDIS_URL` |  | Defaults to `redis://localhost:6379/0` |
+| `USDA_API_KEY` |  | USDA FoodData Central fallback |
+| `AWS_*`, `S3_BUCKET_NAME` |  | Label image storage |
+| `AI_COACH_MESSAGES_PER_DAY`, `LABEL_SCANS_PER_DAY`, ... |  | Per-user rate limits |
 
-#### Step 4 — Run on device or simulator
+<p align="right"><a href="#readme-top">Back to top</a></p>
 
-- **Simulator** — works for all UI features except camera scanning
-- **Physical device** — required for barcode scanner and nutrition label OCR
+## API reference
 
-Select your target device in Xcode and press **⌘R** to build and run.
+Everything is under `/api/v1`. The full, interactive list is at `/docs`.
 
-#### Step 5 — Grant permissions when prompted
-
-On first launch the app requests:
-- **Camera** — barcode and label scanning
-- **HealthKit** — steps, active calories, sleep data
-
----
-
-## Environment Variables
-
-Create a `.env` file in `fitandfine-backend/` with the following:
-
-```env
-# Database
-DATABASE_URL=postgresql+asyncpg://postgres:password@localhost:5432/fitandfine
-DATABASE_URL_READ=postgresql+asyncpg://postgres:password@localhost:5432/fitandfine
-
-# Redis
-REDIS_URL=redis://localhost:6379/0
-
-# Anthropic
-ANTHROPIC_API_KEY=sk-ant-...
-
-# AWS S3 (for nutrition label image storage)
-AWS_ACCESS_KEY_ID=your_access_key
-AWS_SECRET_ACCESS_KEY=your_secret_key
-AWS_S3_BUCKET=fitandfine-label-images
-AWS_REGION=us-east-1
-
-# JWT
-JWT_SECRET_KEY=your-256-bit-secret-key-here
-JWT_ALGORITHM=RS256
-ACCESS_TOKEN_EXPIRE_MINUTES=15
-REFRESH_TOKEN_EXPIRE_DAYS=7
-
-# Apple Sign In
-APPLE_TEAM_ID=YOUR_TEAM_ID
-APPLE_CLIENT_ID=com.yourname.fitandfine
-
-# App settings
-DEBUG=false
-LOG_LEVEL=INFO
-MAX_LABEL_SCANS_PER_DAY=30
-MAX_AI_COACH_MESSAGES_PER_DAY=50
-```
-
----
-
-## AI Agent System
-
-FitandFine uses **4 specialized Claude agents**, each with an isolated system prompt and structured JSON I/O. Agents never call each other directly — all coordination flows through `AgentOrchestrator`.
-
-### Agent 1 — Food Parser Agent
-- **Trigger:** After Tesseract OCR completes on a nutrition label image
-- **Input:** Raw OCR text + confidence score
-- **Output:** Structured nutrition JSON with per-field confidence scores
-- **Confidence cascade:**
-  - `> 0.85` → auto-add to food log
-  - `0.60–0.85` → "Review & Confirm" screen
-  - `< 0.60` → prompt re-scan
-
-### Agent 2 — Diet Analysis Agent
-- **Trigger:** Weekly (Sunday 23:59 user's local timezone) or on-demand via Coach
-- **Input:** 7-day food log summary, weight trend, goal parameters
-- **Output:** Findings with severity ratings (info / warning / critical), adherence score
-
-### Agent 3 — Recommendation Agent
-- **Trigger:** User requests meal suggestions, or > 50% macros remaining after dinner
-- **Input:** Remaining daily macros, dietary restrictions, allergies, budget
-- **Output:** Meal suggestions with exact macro calculations and alternatives
-
-### Agent 4 — Progress Evaluator Agent
-- **Trigger:** Weekly (after Diet Analysis) or when weight deviation exceeds threshold
-- **Input:** 4-week weight history, calorie adherence history, current goal
-- **Output:** Plateau detection, adjustment recommendation (e.g. "reduce by 100 kcal/day")
-
-### AI Coach (Orchestration Layer)
-- Conversational wrapper that routes questions to relevant agents
-- Streams responses back to the iOS app via **Server-Sent Events (SSE)**
-- Never applies goal adjustments silently — always requires user confirmation
-
----
-
-## API Reference
-
-Full interactive documentation is available at `http://localhost:8000/docs` once the backend is running.
-
-### Key Endpoints
-
-| Method | Endpoint | Description |
+| Method | Endpoint | What it does |
 |---|---|---|
-| `POST` | `/auth/apple` | Sign in with Apple → returns JWT tokens |
-| `GET` | `/foods/barcode/{code}` | Look up food by barcode (cache → DB → OpenFoodFacts → USDA) |
-| `GET` | `/foods/search?q={}` | Full-text food search |
-| `POST` | `/foods/label-scan` | Upload nutrition label image → returns `scan_id` |
-| `GET` | `/foods/label-scan/{id}` | Poll OCR scan status and result |
-| `GET` | `/logs/daily?date={}` | Get food log entries for a date with macro totals |
-| `POST` | `/logs/daily` | Add food entry to log |
-| `DELETE` | `/logs/daily/{id}` | Remove entry (soft delete, supports undo) |
-| `GET` | `/goals/` | Get current active goal and calculated targets |
-| `POST` | `/ai/coach/message` | Send message to AI Coach (SSE streaming response) |
-| `GET` | `/ai/recommendations` | Get meal recommendations for remaining macros |
-| `GET` | `/ai/weekly-report` | Latest Diet Analysis Agent output |
-| `GET` | `/analytics/macro-trends?days=30` | Daily macro breakdown for charts |
-| `POST` | `/weight` | Log a weight reading |
-| `GET` | `/weight/history?days=90` | Weight history + 7-day moving average |
+| `POST` | `/auth/dev-login` | Guest session for local development |
+| `POST` | `/auth/apple`, `/auth/google` | Sign in, returns access and refresh tokens |
+| `POST` | `/auth/refresh`, `/auth/logout` | Rotate or revoke tokens |
+| `GET` | `/foods/barcode/{barcode}` | Cache, then DB, then Open Food Facts, then USDA |
+| `GET` | `/foods/search?q=` | Food search |
+| `POST` | `/foods/manual` | Add a custom food |
+| `POST` | `/scan/label` | Label photo to parsed nutrition (Gemini Vision) |
+| `POST` | `/scan/confirm` | Save a reviewed scan as a food |
+| `POST` | `/foods/label-scan` | Queue a label scan on Celery, poll `/foods/label-scan/{scan_id}` |
+| `GET` / `POST` | `/logs/daily` | A day's entries with macro totals / add an entry |
+| `PUT` / `DELETE` | `/logs/daily/{log_id}` | Edit or remove an entry |
+| `GET` | `/logs/analytics` | Daily trends for the charts |
+| `GET` / `POST` | `/goals/` | Active goal and calculated targets / set a new goal |
+| `POST` / `GET` | `/weight/`, `/weight/history` | Log weight / history with trend |
+| `POST` | `/ai/coach/message` | FitCoach, streamed over SSE |
+| `GET` | `/ai/weekly-report` | Diet analysis for the last 7 days |
+| `GET` | `/ai/recommendations` | Meals for your remaining macros |
+| `GET` | `/ai/progress-evaluation` | Trend check and proposed adjustment |
+| `POST` | `/ai/progress-evaluation/apply` | Apply an adjustment the user approved |
 
----
+## Project structure
 
-## Project Structure
-
-```
+```text
 FitandFine/
 ├── FitandFine-iOS/
-│   └── FitandFineIOS/
+│   └── FitandFineIOS/                 Xcode project (open FitandFineIOS.xcodeproj)
 │       └── FitandFineIOS/
-│           ├── App/                        # Entry point, app lifecycle
-│           ├── Coordinators/               # MVVM-C navigation coordinators
-│           │   ├── AppCoordinator.swift
-│           │   ├── AuthCoordinator.swift
-│           │   ├── DashboardCoordinator.swift
-│           │   ├── FoodLogCoordinator.swift
-│           │   └── CoachCoordinator.swift
-│           ├── ViewModels/                 # @MainActor ObservableObject classes
+│           ├── App/                   entry point and lifecycle
+│           ├── Coordinators/          MVVM-C navigation
+│           ├── ViewModels/
 │           ├── Views/
-│           │   ├── Auth/                   # WelcomeView, SignInView
-│           │   ├── Dashboard/              # DashboardView, StreakCard, SleepCard, ActivityCard
-│           │   ├── FoodLog/                # FoodLogView with swipe-to-delete
-│           │   ├── Coach/                  # CoachChatView (SSE streaming), WeeklyReportView
-│           │   ├── Analytics/              # AnalyticsView with Swift Charts
-│           │   ├── Scanner/                # BarcodeScannerView, LabelScanResultView
-│           │   ├── Food/                   # FoodDetailView, ManualEntryView
-│           │   ├── Profile/                # ProfileView, GoalEditView
-│           │   ├── Onboarding/             # OnboardingView (profile + goal setup)
-│           │   └── Common/                 # DesignSystem.swift, ViewStateModifier.swift
-│           ├── Models/                     # Codable API response models
-│           ├── Networking/                 # NetworkClient, APIError
-│           └── Managers/                   # HealthKitManager
-│
+│           │   ├── Dashboard/         calorie ring, macros, streak, activity, sleep
+│           │   ├── FoodLog/  Food/    log by meal, food detail
+│           │   ├── Scanner/           barcode + label scan
+│           │   ├── Coach/             FitCoach chat, weekly report, progress evaluation
+│           │   ├── Analytics/         Swift Charts trends and macro split
+│           │   ├── Onboarding/  Profile/  Auth/
+│           │   └── Common/            DesignSystem.swift
+│           ├── Models/  Networking/
+│           └── Services/              HealthKitManager
 ├── fitandfine-backend/
-│   └── app/
-│       ├── main.py                         # FastAPI app factory
-│       ├── config.py                       # Pydantic Settings
-│       ├── api/v1/                         # Route handlers
-│       ├── agents/                         # 4 Claude agents + orchestrator
-│       │   ├── base_agent.py
-│       │   ├── food_parser_agent.py
-│       │   ├── diet_analysis_agent.py
-│       │   ├── recommendation_agent.py
-│       │   ├── progress_evaluator_agent.py
-│       │   ├── coach_agent.py
-│       │   └── orchestrator.py
-│       ├── services/                       # OCR, food DB, S3, cache, macro math
-│       ├── repositories/                   # SQLAlchemy async DB access
-│       ├── models/                         # SQLAlchemy ORM models
-│       ├── schemas/                        # Pydantic v2 request/response schemas
-│       ├── tasks/                          # Celery OCR + analytics tasks
-│       └── middleware/                     # Auth, rate limiting, request ID
-│
-├── fitandfine-preview.html                 # Interactive UI prototype (open in browser)
-└── README.md
+│   ├── app/
+│   │   ├── api/v1/                    auth, users, foods, logs, goals, weight, scan, ai
+│   │   ├── services/                  the agents, coach, food DB, macros, cache
+│   │   ├── repositories/              SQLAlchemy async data access
+│   │   ├── models/  schemas/          ORM models, Pydantic v2 schemas
+│   │   └── tasks/                     Celery app, label-scan and analytics jobs
+│   ├── alembic/                       migrations
+│   ├── docker-compose.yml             Postgres, Redis, API, worker
+│   └── test_phase1.py                 end-to-end endpoint checks
+├── fitandfine-preview.html            clickable UI prototype, open in a browser
+└── screenshots/
 ```
 
----
+## Tech stack
 
-## Tech Stack
-
-| Layer | Technology | Why |
+| Layer | Choice | Why |
 |---|---|---|
-| iOS | Swift 5.9 + SwiftUI | Declarative UI, native performance |
-| Navigation | MVVM-C (Coordinator pattern) | Solves SwiftUI nav complexity cleanly |
-| Local persistence | SwiftData | Modern Swift, offline support |
-| Camera | AVFoundation | Real-time barcode + photo capture |
-| Health data | HealthKit | Steps, sleep, active calories |
-| Charts | Swift Charts | Native, animatable data visualization |
-| Backend | FastAPI (Python) | Async, first-class Anthropic SDK |
-| AI | Claude API (Anthropic) | Multi-agent, structured tool use |
-| OCR | Tesseract 5 + OpenCV | Server-side for pipeline co-location with Claude |
-| Database | PostgreSQL 15 | Relational integrity, JSONB for agent outputs |
-| Cache | Redis 7 | Session tokens, barcode lookup, Celery broker |
-| Storage | AWS S3 | Nutrition label images |
-| Background tasks | Celery + Redis | Async OCR, weekly analysis scheduling |
-| Migrations | Alembic | PostgreSQL schema versioning |
-
----
+| iOS UI | Swift 5.9, SwiftUI | Declarative, native performance |
+| Navigation | MVVM-C | Keeps SwiftUI navigation out of the views |
+| Local data | SwiftData | Offline cache with modern Swift |
+| Camera, health | AVFoundation, HealthKit | Real-time barcodes, steps, sleep, active calories |
+| Charts | Swift Charts | Native, animatable trends |
+| API | FastAPI, Pydantic v2 | Async, typed, self-documenting |
+| AI | Gemini 2.0 Flash (text + vision) | Structured JSON output on a free tier |
+| Database | PostgreSQL 16, SQLAlchemy 2.0, Alembic | Relational integrity, JSONB for agent output |
+| Cache, queue | Redis 7, Celery | Barcode cache, rate limits, background scans |
+| Food data | Open Food Facts, USDA FoodData Central | Broad barcode coverage with a trusted fallback |
 
 ## Roadmap
 
-- [x] Barcode scanning + USDA food lookup
-- [x] Manual food log with swipe-to-delete
-- [x] AI Coach (conversational, SSE streaming)
-- [x] Weekly diet analysis reports
-- [x] Streak tracking with chain-dot visualization
-- [x] Apple Health integration (steps, sleep, active calories)
-- [x] OCR nutrition label scanning
-- [x] Adaptive calorie target system
-- [ ] Restaurant food photo estimation (photograph meal → macro estimate)
-- [ ] Meal planning and scheduling
-- [ ] Apple Watch companion app
-- [ ] Home Screen widget (quick food log)
-- [ ] Android version
+- [x] Barcode scanning with Open Food Facts and USDA lookup
+- [x] Food log with swipe to delete
+- [x] FitCoach over SSE
+- [x] Weekly diet analysis
+- [x] Streaks, Apple Health (steps, sleep, active calories)
+- [x] Label scanning with Gemini Vision
+- [x] Adaptive calorie targets with user approval
+- [ ] Tesseract fallback for label scans when the model is unavailable
+- [ ] Photo-based meal estimates
+- [ ] Meal planning
+- [ ] Home Screen widget and Apple Watch companion
 
----
+<p align="right"><a href="#readme-top">Back to top</a></p>
 
-## Contributing
+## Author
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Commit your changes: `git commit -m "feat: add your feature"`
-4. Push to the branch: `git push origin feature/your-feature`
-5. Open a Pull Request
+**Aditya Sidham**, applied AI, iOS and backend engineer in Los Angeles.
 
----
+[![Website](https://img.shields.io/badge/adityasidham.site-7C93FF?style=for-the-badge&labelColor=0D1424)](https://adityasidham.site)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/adityasidham/)
+[![GitHub](https://img.shields.io/badge/More%20projects-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/AdityaSidham)
 
-
-
-<div align="center">
-
-  <sub>Made by <a href="https://github.com/AdityaSidham">Aditya Sidham</a></sub>
-</div>
+Found a bug or have an idea? [Open an issue](https://github.com/AdityaSidham/FitandFine/issues).
