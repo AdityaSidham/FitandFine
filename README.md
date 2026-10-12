@@ -90,24 +90,32 @@ I designed and built all of it, solo: the iOS app, the backend, the data model a
 ## Architecture
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph iOS["iOS app: SwiftUI + MVVM-C"]
-        V[Views] --> VM[ViewModels] --> NC[NetworkClient]
-        HK[HealthKit] --> VM
+        direction LR
+        HK[HealthKit] --> VM[ViewModels]
         SD[(SwiftData cache)] <--> VM
+        VM --> NC[NetworkClient]
     end
-    NC -- "REST + SSE" --> API
     subgraph BE["FastAPI backend"]
-        API[api/v1 routers] --> SVC[Services]
-        SVC --> REPO[Repositories]
-        API -. "label-scan jobs" .-> CEL[Celery workers]
+        direction LR
+        API[api/v1 routers] --> SVC[Services and agents] --> REPO[Repositories]
+        API -. label-scan jobs .-> CEL[Celery workers]
     end
-    REPO --> PG[(PostgreSQL 16)]
-    SVC <--> RD[(Redis 7)]
+    subgraph DATA["Data and models"]
+        direction LR
+        PG[(PostgreSQL 16)]
+        RD[(Redis 7)]
+        GEM{{Gemini 2.0 Flash}}
+        EXT[Open Food Facts + USDA]
+    end
+    NC -- REST + SSE --> API
+    REPO --> PG
+    SVC <--> RD
     CEL --> RD
-    SVC --> GEM{{Gemini 2.0 Flash}}
+    SVC --> GEM
     CEL --> GEM
-    SVC --> EXT[Open Food Facts + USDA]
+    SVC --> EXT
 ```
 
 - **iOS:** SwiftUI with MVVM plus coordinators for navigation, SwiftData for the offline cache, AVFoundation for the camera, HealthKit for activity and sleep, Swift Charts for analytics.
